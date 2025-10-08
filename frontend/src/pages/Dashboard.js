@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext.js';
 import { inventoryService, salesService, predictionsService } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
+import DarkModeToggle from '../components/DarkModeToggle';
 
 const Dashboard = () => {
     const { user, logout } = useAuth();
@@ -56,6 +57,7 @@ const Dashboard = () => {
         <div className="dashboard">
             <nav className="navbar">
                 <h1>Sistema de Inventario</h1>
+                <DarkModeToggle />
                 <div className="nav-links">
                     <button onClick={() => navigate('/dashboard')}>Dashboard</button>
                     <button onClick={() => navigate('/inventory')}>Inventario</button>

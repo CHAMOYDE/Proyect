@@ -31,7 +31,7 @@ const Login = () => {
     return (
         <div className="login-container">
             <div className="login-box">
-                <h1>Sistema de Inventario</h1>
+                <h1>Soluciones Tecnológicas E Informáticas D & R E.I.R.L.</h1>
                 <h2>Iniciar Sesión</h2>
 
                 <form onSubmit={handleSubmit}>
