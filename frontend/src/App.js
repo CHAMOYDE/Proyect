@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory';
+import Sales from './pages/Sales';
 import './App.css';
 
 function App() {
@@ -28,6 +29,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Inventory />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/sales"
+              element={
+                <ProtectedRoute>
+                  <Sales />
                 </ProtectedRoute>
               }
             />

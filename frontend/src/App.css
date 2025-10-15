@@ -200,3 +200,87 @@ body.dark-mode .btn-secondary:hover {
 body.dark-mode .loading {
   color: #ffffff;
 }
+
+body.dark-mode .sales {
+  background: #0f0f1e;
+}
+
+body.dark-mode .sales-content h2 {
+  color: #ffffff;
+}
+
+body.dark-mode .sales-table {
+  background: #1a1a2e;
+  border: 2px solid #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+body.dark-mode .sales-table thead {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+body.dark-mode .sales-table th {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+body.dark-mode .sales-table tbody tr {
+  background: #1a1a2e;
+  border-bottom: 2px solid #667eea;
+}
+
+body.dark-mode .sales-table tbody tr:hover {
+  background: #2a2a3e !important;
+  border-bottom: 2px solid #764ba2;
+}
+
+body.dark-mode .sales-table tbody tr:nth-child(even) {
+  background: #16213e;
+}
+
+body.dark-mode .sales-table tbody tr:nth-child(even):hover {
+  background: #2a2a3e !important;
+}
+
+body.dark-mode .sales-table td {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  border-right: 1px solid #2a2a3e;
+}
+
+body.dark-mode .sales-table td:last-child {
+  border-right: none;
+}
+
+body.dark-mode .sale-summary {
+  background: #1a1a2e;
+  border-left-color: #667eea;
+}
+
+body.dark-mode .sale-summary p {
+  color: #ffffff;
+}
+
+body.dark-mode .date-filters {
+  background: #1a1a2e;
+}
+
+body.dark-mode .report-table {
+  background: #1a1a2e;
+}
+
+body.dark-mode .report-table tbody tr {
+  border-bottom: 1px solid #2a2a3e;
+}
+
+body.dark-mode .report-table tbody tr:hover {
+  background: #2a2a3e;
+}
+
+body.dark-mode .report-table td {
+  color: #ffffff;
+}
+
+body.dark-mode .report-content h4 {
+  color: #ffffff;
+}
