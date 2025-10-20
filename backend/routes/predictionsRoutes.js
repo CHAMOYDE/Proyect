@@ -7,7 +7,7 @@ const {
 } = require('../controllers/predictionsController');
 
 // Todas las rutas requieren autenticación
-router.use(authMiddleware);
+//router.use(authMiddleware);
 
 // GET /api/predictions - Obtener predicciones de demanda
 router.get('/', getPredictions);

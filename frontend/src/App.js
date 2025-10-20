@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory';
 import Sales from './pages/Sales';
+import Predictions from './pages/Predictions';
 import './App.css';
 
 function App() {
@@ -37,6 +38,15 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Sales />
+                </ProtectedRoute>
+              }
+            />
+            {/* Nueva ruta para Predictions */}
+            <Route
+              path="/predictions"
+              element={
+                <ProtectedRoute>
+                  <Predictions />
                 </ProtectedRoute>
               }
             />

@@ -284,3 +284,85 @@ body.dark-mode .report-table td {
 body.dark-mode .report-content h4 {
   color: #ffffff;
 }
+
+body.dark-mode .predictions {
+  background: #0f0f1e;
+}
+
+body.dark-mode .predictions-content h2 {
+  color: #ffffff;
+  -webkit-text-fill-color: #ffffff;
+}
+
+body.dark-mode .prediction-search {
+  background: #1a1a2e;
+}
+
+body.dark-mode .prediction-search h3 {
+  color: #ffffff;
+}
+
+body.dark-mode .search-form select,
+body.dark-mode .search-form input {
+  background: #2a2a3e;
+  border-color: #3a3a4e;
+  color: #ffffff;
+}
+
+body.dark-mode .search-form select option {
+  background: #2a2a3e;
+  color: #ffffff;
+}
+
+body.dark-mode .chart-card {
+  background: #1a1a2e;
+}
+
+body.dark-mode .chart-card h3 {
+  color: #ffffff;
+}
+
+body.dark-mode .predictions-table {
+  background: #1a1a2e;
+}
+
+body.dark-mode .predictions-table h3 {
+  color: #ffffff;
+}
+
+body.dark-mode .predictions-table thead {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+body.dark-mode .predictions-table tbody tr {
+  border-bottom: 2px solid #667eea;
+  background: #1a1a2e;
+}
+
+body.dark-mode .predictions-table tbody tr:hover {
+  background: #2a2a3e !important;
+  border-bottom: 2px solid #764ba2;
+}
+
+body.dark-mode .predictions-table td {
+  color: #ffffff !important;
+  border-right: 1px solid #2a2a3e;
+}
+
+body.dark-mode .predictions-table td:last-child {
+  border-right: none;
+}
+
+/* Gráficas en modo oscuro */
+body.dark-mode .recharts-text {
+  fill: #ffffff !important;
+}
+
+body.dark-mode .recharts-cartesian-grid-horizontal line,
+body.dark-mode .recharts-cartesian-grid-vertical line {
+  stroke: #3a3a4e;
+}
+
+body.dark-mode .recharts-legend-item-text {
+  color: #ffffff !important;
+}

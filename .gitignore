@@ -1,0 +1,19 @@
+# Entornos virtuales
+.venv/
+
+# Node modules
+node_modules/
+
+# Archivos de entorno
+.env
+*.env
+
+# Carpetas de datos temporales
+bd/datos/
+
+# Archivos de configuración local
+config.py
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
