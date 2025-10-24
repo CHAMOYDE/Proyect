@@ -64,10 +64,6 @@ const Login = () => {
                     </button>
                 </form>
 
-                <div className="login-info">
-                    <p><strong>Usuario demo:</strong> admin</p>
-                    <p><strong>Contraseña:</strong> admin123</p>
-                </div>
             </div>
         </div>
     );

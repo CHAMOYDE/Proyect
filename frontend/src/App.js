@@ -41,7 +41,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            {/* Nueva ruta para Predictions */}
             <Route
               path="/predictions"
               element={
