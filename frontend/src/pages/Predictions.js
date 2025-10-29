@@ -15,6 +15,7 @@ const Predictions = () => {
     const [selectedProduct, setSelectedProduct] = useState('');
     const [days, setDays] = useState(30);
     const [selectedPrediction, setSelectedPrediction] = useState(null);
+    const [sidebarOpen, setSidebarOpen] = useState(true); // Para colapsar
 
     const COLORS = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a'];
 
@@ -56,14 +57,12 @@ const Predictions = () => {
         }
     };
 
-    // Preparar datos para gráfica de tendencias
     const trendChartData = trends.slice(0, 5).map(trend => ({
         name: trend.productName.substring(0, 15) + '...',
         ventas: trend.totalQuantity,
         ingresos: trend.totalRevenue
     }));
 
-    // Preparar datos para gráfica de prioridad
     const priorityData = [
         { name: 'Alta', value: predictions.filter(p => p.priority === 'Alta').length, color: '#ff4444' },
         { name: 'Media', value: predictions.filter(p => p.priority === 'Media').length, color: '#ffaa00' },
@@ -75,27 +74,46 @@ const Predictions = () => {
     }
 
     return (
-        <div className="predictions">
-            <nav className="navbar">
-                <h1>D & R E.I.R.L.</h1>
-                <div className="nav-links">
-                    <button onClick={() => navigate('/dashboard')}>Dashboard</button>
-                    <button onClick={() => navigate('/inventory')}>Inventario</button>
-                    <button onClick={() => navigate('/sales')}>Ventas</button>
-                    <button onClick={() => navigate('/predictions')} className="active">Predicciones</button>
+        <div className="predictions-layout">
+            {/* Sidebar Izquierdo */}
+            <aside className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
+                <div className="sidebar-header">
+                    <h2>D & R</h2>
+                    <button className="toggle-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
+                        {sidebarOpen ? '←' : '→'}
+                    </button>
                 </div>
-                <div className="user-info">
+                <nav className="sidebar-nav">
+                    <button onClick={() => navigate('/dashboard')} className="nav-item">
+                        Dashboard
+                    </button>
+                    <button onClick={() => navigate('/inventory')} className="nav-item">
+                        Inventario
+                    </button>
+                    <button onClick={() => navigate('/sales')} className="nav-item">
+                        Ventas
+                    </button>
+                    <button onClick={() => navigate('/predictions')} className="nav-item active">
+                        Predicciones
+                    </button>
+                </nav>
+                <div className="sidebar-footer">
                     <span>Bienvenido, {user?.name}</span>
-                    <button onClick={handleLogout} className="logout-btn">Cerrar Sesión</button>
+                    <button onClick={handleLogout} className="logout-btn-sidebar">
+                        Cerrar Sesión
+                    </button>
                 </div>
-            </nav>
+            </aside>
 
-            <div className="predictions-content">
-                <h2>Predicciones y Análisis con IA</h2>
+            {/* Contenido Principal */}
+            <main className="main-content">
+                <header className="page-header">
+                    <h1>Predicciones y Análisis con IA</h1>
+                </header>
 
                 {/* Búsqueda de predicción específica */}
                 <div className="prediction-search">
-                    <h3>🔍 Predicción por Producto</h3>
+                    <h3>Predicción por Producto</h3>
                     <div className="search-form">
                         <select
                             value={selectedProduct}
@@ -159,9 +177,8 @@ const Predictions = () => {
 
                 {/* Gráficas */}
                 <div className="charts-grid">
-                    {/* Gráfica de Tendencias */}
                     <div className="chart-card">
-                        <h3>📈 Tendencias de Ventas (Top 5)</h3>
+                        <h3>Tendencias de Ventas (Top 5)</h3>
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={trendChartData}>
                                 <CartesianGrid strokeDasharray="3 3" />
@@ -175,9 +192,8 @@ const Predictions = () => {
                         </ResponsiveContainer>
                     </div>
 
-                    {/* Gráfica de Prioridades */}
                     <div className="chart-card">
-                        <h3>⚠️ Distribución de Prioridades</h3>
+                        <h3>Distribución de Prioridades</h3>
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
                                 <Pie
@@ -202,7 +218,7 @@ const Predictions = () => {
 
                 {/* Tabla de Predicciones */}
                 <div className="predictions-table">
-                    <h3>📊 Predicciones de Demanda</h3>
+                    <h3>Predicciones de Demanda</h3>
                     <table>
                         <thead>
                             <tr>
@@ -236,7 +252,7 @@ const Predictions = () => {
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </main>
         </div>
     );
 };

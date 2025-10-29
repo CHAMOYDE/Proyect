@@ -29,41 +29,77 @@ const Login = () => {
     };
 
     return (
-        <div className="login-container">
-            <div className="login-box">
-                <h1>D & R</h1>
-                <h2>Iniciar Sesión</h2>
+        <div className="login-wrapper">
+            {/* Fondo con partículas */}
+            <div className="particles">
+                {[...Array(50)].map((_, i) => (
+                    <span key={i} style={{ '--i': i }}></span>
+                ))}
+            </div>
 
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label>Usuario</label>
-                        <input
-                            type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            placeholder="Ingresa tu usuario"
-                            required
-                        />
+            {/* Contenedor principal */}
+            <div className="login-container-modern">
+                {/* Lado izquierdo: Branding */}
+                <div className="login-brand">
+                    <div className="brand-content">
+                        <h1>D & R</h1>
+                        <p>Sistema de Inventario y Gestion de ventas</p>
+                        <div className="brand-decoration">
+                            <div className="circle"></div>
+                            <div className="circle"></div>
+                            <div className="circle"></div>
+                        </div>
                     </div>
+                </div>
 
-                    <div className="form-group">
-                        <label>Contraseña</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Ingresa tu contraseña"
-                            required
-                        />
+                {/* Lado derecho: Formulario */}
+                <div className="login-form">
+                    <div className="form-box">
+                        <h2>Iniciar Sesión</h2>
+                        <p className="subtitle">Accede a tu panel de control</p>
+
+                        <form onSubmit={handleSubmit}>
+                            <div className="input-group">
+                                <label>Usuario</label>
+                                <input
+                                    type="text"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    required
+                                />
+                                <span className="input-icon">User</span>
+                            </div>
+
+                            <div className="input-group">
+                                <label>Contraseña</label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                                <span className="input-icon">Lock</span>
+                            </div>
+
+                            {error && <div className="error-alert">{error}</div>}
+
+                            <button type="submit" disabled={loading} className="login-btn">
+                                {loading ? (
+                                    <>
+                                        <span className="spinner"></span> Iniciando...
+                                    </>
+                                ) : (
+                                    'Iniciar Sesión'
+                                )}
+                            </button>
+                        </form>
+
+                        <div className="login-footer">
+                            <p><strong>Usuario:</strong> admin</p>
+                            <p><strong>Contraseña:</strong> admin123</p>
+                        </div>
                     </div>
-
-                    {error && <div className="error-message">{error}</div>}
-
-                    <button type="submit" disabled={loading}>
-                        {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
-                    </button>
-                </form>
-
+                </div>
             </div>
         </div>
     );
