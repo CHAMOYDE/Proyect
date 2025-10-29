@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { inventoryService } from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import Sidebar from '../components/Sidebar';
 import './Inventory.css';
 
 const Inventory = () => {
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -21,6 +22,7 @@ const Inventory = () => {
         expiryDate: '',
         supplier: ''
     });
+    const [isCollapsed, setIsCollapsed] = useState(false); // Para colapsar sidebar
 
     useEffect(() => {
         loadProducts();
@@ -29,18 +31,19 @@ const Inventory = () => {
     const loadProducts = async () => {
         try {
             const response = await inventoryService.getProducts();
-            setProducts(response.data.products);
+            const productsList = Array.isArray(response.data.products)
+                ? response.data.products
+                : [];
+            setProducts(productsList);
             setLoading(false);
         } catch (error) {
             console.error('Error al cargar productos:', error);
+            setProducts([]);
             setLoading(false);
         }
     };
 
-    const handleLogout = () => {
-        logout();
-        navigate('/');
-    };
+    const toggleSidebar = () => setIsCollapsed(!isCollapsed);
 
     const openModal = (product = null) => {
         if (product) {
@@ -107,74 +110,75 @@ const Inventory = () => {
     }
 
     return (
-        <div className="inventory">
-            <nav className="navbar">
-                <h1>Sistema de Inventario</h1>
-                <div className="nav-links">
-                    <button onClick={() => navigate('/dashboard')}>Dashboard</button>
-                    <button onClick={() => navigate('/inventory')} className="active">Inventario</button>
-                    <button onClick={() => navigate('/sales')}>Ventas</button>
-                    <button onClick={() => navigate('/predictions')}>Predicciones</button>
-                </div>
-                <div className="user-info">
-                    <span>Bienvenido, {user?.name}</span>
-                    <button onClick={handleLogout} className="logout-btn">Cerrar Sesión</button>
-                </div>
-            </nav>
+        <div className="app-container">
+            {/* Sidebar reutilizable */}
+            <Sidebar isCollapsed={isCollapsed} toggleSidebar={toggleSidebar} />
 
-            <div className="inventory-content">
-                <div className="header">
-                    <h2>Inventario de Productos</h2>
-                    {user?.role === 'admin' && (
+            {/* Contenido principal */}
+            <div className={`main-content ${isCollapsed ? 'expanded' : ''}`}>
+                <header className="page-header">
+                    <h1>Inventario de Productos</h1>
+                </header>
+
+                <div className="inventory-content">
+                    <div className="header">
+                        {/* BOTÓN SIEMPRE VISIBLE PARA TODOS */}
                         <button onClick={() => openModal()} className="btn-primary">
                             + Nuevo Producto
                         </button>
-                    )}
-                </div>
+                    </div>
 
-                <div className="products-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>SKU</th>
-                                <th>Nombre</th>
-                                <th>Categoría</th>
-                                <th>Stock</th>
-                                <th>Mín. Stock</th>
-                                <th>Precio</th>
-                                <th>Proveedor</th>
-                                <th>Vencimiento</th>
-                                {user?.role === 'admin' && <th>Acciones</th>}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {products.map(product => (
-                                <tr key={product.id} className={product.stock < product.minStock ? 'low-stock' : ''}>
-                                    <td>{product.sku}</td>
-                                    <td>{product.name}</td>
-                                    <td>{product.category}</td>
-                                    <td>{product.stock}</td>
-                                    <td>{product.minStock}</td>
-                                    <td>S/ {product.price}</td>
-                                    <td>{product.supplier}</td>
-                                    <td>{product.expiryDate || 'N/A'}</td>
-                                    {user?.role === 'admin' && (
-                                        <td className="actions">
-                                            <button onClick={() => openModal(product)} className="btn-edit">
-                                                Editar
-                                            </button>
-                                            <button onClick={() => handleDelete(product.id)} className="btn-delete">
-                                                Eliminar
-                                            </button>
-                                        </td>
-                                    )}
+                    <div className="products-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>SKU</th>
+                                    <th>Nombre</th>
+                                    <th>Categoría</th>
+                                    <th>Stock</th>
+                                    <th>Mín. Stock</th>
+                                    <th>Precio</th>
+                                    <th>Proveedor</th>
+                                    <th>Vencimiento</th>
+                                    <th>Acciones</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {Array.isArray(products) && products.length > 0 ? (
+                                    products.map(product => (
+                                        <tr key={product.id} className={product.stock < product.minStock ? 'low-stock' : ''}>
+                                            <td>{product.sku}</td>
+                                            <td>{product.name}</td>
+                                            <td>{product.category}</td>
+                                            <td>{product.stock}</td>
+                                            <td>{product.minStock}</td>
+                                            <td>S/ {product.price}</td>
+                                            <td>{product.supplier}</td>
+                                            <td>{product.expiryDate || 'N/A'}</td>
+                                            <td className="actions">
+                                                <button onClick={() => openModal(product)} className="btn-edit">
+                                                    Editar
+                                                </button>
+                                                <button onClick={() => handleDelete(product.id)} className="btn-delete">
+                                                    Eliminar
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="9" style={{ textAlign: 'center', padding: '20px' }}>
+                                            No hay productos en el inventario
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
+            {/* Modal */}
             {showModal && (
                 <div className="modal">
                     <div className="modal-content">

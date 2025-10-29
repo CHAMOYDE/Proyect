@@ -3,10 +3,11 @@ import { useAuth } from '../context/AuthContext';
 import { salesService, inventoryService } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { jsPDF } from 'jspdf';
+import Sidebar from '../components/Sidebar';
 import './Sales.css';
 
 const Sales = () => {
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
     const navigate = useNavigate();
     const [sales, setSales] = useState([]);
     const [products, setProducts] = useState([]);
@@ -17,7 +18,7 @@ const Sales = () => {
     const [reportData, setReportData] = useState(null);
     const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
     const [editingBlocked, setEditingBlocked] = useState(false);
-    const [sidebarOpen, setSidebarOpen] = useState(true); // Para móvil (opcional)
+    const [isCollapsed, setIsCollapsed] = useState(false); // Para colapsar sidebar
 
     useEffect(() => {
         loadData();
@@ -29,11 +30,11 @@ const Sales = () => {
                 salesService.getSales(),
                 inventoryService.getProducts()
             ]);
-            const sortedSales = salesRes.data.sales
+            const sortedSales = (salesRes.data.sales || [])
                 .sort((a, b) => new Date(b.date) - new Date(a.date))
                 .slice(0, 20);
             setSales(sortedSales);
-            setProducts(productsRes.data.products);
+            setProducts(productsRes.data.products || []);
             setLoading(false);
         } catch (error) {
             console.error('Error al cargar datos:', error);
@@ -41,10 +42,7 @@ const Sales = () => {
         }
     };
 
-    const handleLogout = () => {
-        logout();
-        navigate('/');
-    };
+    const toggleSidebar = () => setIsCollapsed(!isCollapsed);
 
     const openModal = () => {
         setFormData({ productId: '', quantity: '' });
@@ -92,8 +90,6 @@ const Sales = () => {
         alert('Las ventas están bloqueadas. No se permite edición.');
     };
 
-    if (loading) return <div className="loading">Cargando...</div>;
-
     const handleDownloadPDF = () => {
         const doc = new jsPDF();
         let y = 20;
@@ -114,42 +110,17 @@ const Sales = () => {
         doc.save(`reporte_ventas_${new Date().toISOString().split('T')[0]}.pdf`);
     };
 
-    return (
-        <div className="sales-layout">
-            {/* Sidebar Izquierdo */}
-            <aside className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
-                <div className="sidebar-header">
-                    <h2>D & R</h2>
-                    <button className="toggle-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
-                        {sidebarOpen ? '←' : '→'}
-                    </button>
-                </div>
-                <nav className="sidebar-nav">
-                    <button onClick={() => navigate('/dashboard')} className="nav-item">
-                        Dashboard
-                    </button>
-                    <button onClick={() => navigate('/inventory')} className="nav-item">
-                        Inventario
-                    </button>
-                    <button onClick={() => navigate('/sales')} className="nav-item active">
-                        Ventas
-                    </button>
-                    <button onClick={() => navigate('/predictions')} className="nav-item">
-                        Predicciones
-                    </button>
-                </nav>
-                <div className="sidebar-footer">
-                    <span>Bienvenido, {user?.name}</span>
-                    <button onClick={handleLogout} className="logout-btn-sidebar">
-                        Cerrar Sesión
-                    </button>
-                </div>
-            </aside>
+    if (loading) return <div className="loading">Cargando...</div>;
 
-            {/* Contenido Principal */}
-            <main className="main-content">
+    return (
+        <div className="app-container">
+            {/* Sidebar reutilizable */}
+            <Sidebar isCollapsed={isCollapsed} toggleSidebar={toggleSidebar} />
+
+            {/* Contenido principal */}
+            <div className={`main-content ${isCollapsed ? 'expanded' : ''}`}>
                 <header className="page-header">
-                    <h1>Últimas 20 Ventas</h1>
+                    <h1>Ventas</h1>
                     <div className="header-actions">
                         <button onClick={openModal} className="btn-primary">
                             + Nueva Venta
@@ -198,9 +169,9 @@ const Sales = () => {
                         </tbody>
                     </table>
                 </div>
-            </main>
+            </div>
 
-            {/* Modales (sin cambios) */}
+            {/* Modal Nueva Venta */}
             {showModal && (
                 <div className="modal">
                     <div className="modal-content">
@@ -235,6 +206,7 @@ const Sales = () => {
                 </div>
             )}
 
+            {/* Modal Reporte */}
             {showReportModal && (
                 <div className="modal">
                     <div className="modal-content modal-large">
@@ -262,7 +234,11 @@ const Sales = () => {
                                     <thead><tr><th>Producto</th><th>Cantidad</th><th>Ingresos</th></tr></thead>
                                     <tbody>
                                         {reportData.topProducts.map((p, i) => (
-                                            <tr key={i}><td>{p.name}</td><td>{p.quantity}</td><td>S/ {p.revenue}</td></tr>
+                                            <tr key={i}>
+                                                <td>{p.name}</td>
+                                                <td>{p.quantity}</td>
+                                                <td>S/ {p.revenue}</td>
+                                            </tr>
                                         ))}
                                     </tbody>
                                 </table>

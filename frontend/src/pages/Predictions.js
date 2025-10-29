@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { predictionsService, inventoryService } from '../services/api';
-import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import Sidebar from '../components/Sidebar';
 import './Predictions.css';
 
 const Predictions = () => {
-    const { user, logout } = useAuth();
-    const navigate = useNavigate();
+    const { user } = useAuth();
     const [predictions, setPredictions] = useState([]);
     const [trends, setTrends] = useState([]);
     const [products, setProducts] = useState([]);
@@ -15,7 +14,7 @@ const Predictions = () => {
     const [selectedProduct, setSelectedProduct] = useState('');
     const [days, setDays] = useState(30);
     const [selectedPrediction, setSelectedPrediction] = useState(null);
-    const [sidebarOpen, setSidebarOpen] = useState(true); // Para colapsar
+    const [isCollapsed, setIsCollapsed] = useState(false); // Para colapsar sidebar
 
     const COLORS = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a'];
 
@@ -30,19 +29,14 @@ const Predictions = () => {
                 predictionsService.getTrends(),
                 inventoryService.getProducts()
             ]);
-            setPredictions(predictionsRes.data.predictions);
-            setTrends(trendsRes.data.trends);
-            setProducts(productsRes.data.products);
+            setPredictions(predictionsRes.data.predictions || []);
+            setTrends(trendsRes.data.trends || []);
+            setProducts(productsRes.data.products || []);
             setLoading(false);
         } catch (error) {
             console.error('Error al cargar datos:', error);
             setLoading(false);
         }
-    };
-
-    const handleLogout = () => {
-        logout();
-        navigate('/');
     };
 
     const handleProductSearch = async () => {
@@ -69,44 +63,19 @@ const Predictions = () => {
         { name: 'Baja', value: predictions.filter(p => p.priority === 'Baja').length, color: '#00cc66' }
     ].filter(item => item.value > 0);
 
+    const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+
     if (loading) {
         return <div className="loading">Cargando...</div>;
     }
 
     return (
-        <div className="predictions-layout">
-            {/* Sidebar Izquierdo */}
-            <aside className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
-                <div className="sidebar-header">
-                    <h2>D & R</h2>
-                    <button className="toggle-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
-                        {sidebarOpen ? '←' : '→'}
-                    </button>
-                </div>
-                <nav className="sidebar-nav">
-                    <button onClick={() => navigate('/dashboard')} className="nav-item">
-                        Dashboard
-                    </button>
-                    <button onClick={() => navigate('/inventory')} className="nav-item">
-                        Inventario
-                    </button>
-                    <button onClick={() => navigate('/sales')} className="nav-item">
-                        Ventas
-                    </button>
-                    <button onClick={() => navigate('/predictions')} className="nav-item active">
-                        Predicciones
-                    </button>
-                </nav>
-                <div className="sidebar-footer">
-                    <span>Bienvenido, {user?.name}</span>
-                    <button onClick={handleLogout} className="logout-btn-sidebar">
-                        Cerrar Sesión
-                    </button>
-                </div>
-            </aside>
+        <div className="app-container">
+            {/* Sidebar externo */}
+            <Sidebar isCollapsed={isCollapsed} toggleSidebar={toggleSidebar} />
 
-            {/* Contenido Principal */}
-            <main className="main-content">
+            {/* Contenido principal */}
+            <div className={`main-content ${isCollapsed ? 'expanded' : ''}`}>
                 <header className="page-header">
                     <h1>Predicciones y Análisis con IA</h1>
                 </header>
@@ -252,7 +221,7 @@ const Predictions = () => {
                         </tbody>
                     </table>
                 </div>
-            </main>
+            </div>
         </div>
     );
 };
