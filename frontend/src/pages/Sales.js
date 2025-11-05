@@ -18,7 +18,7 @@ const Sales = () => {
     const [reportData, setReportData] = useState(null);
     const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
     const [editingBlocked, setEditingBlocked] = useState(false);
-    const [isCollapsed, setIsCollapsed] = useState(false); // Para colapsar sidebar
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     useEffect(() => {
         loadData();
@@ -92,22 +92,260 @@ const Sales = () => {
 
     const handleDownloadPDF = () => {
         const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
         let y = 20;
-        doc.setFontSize(18); doc.setTextColor(102, 126, 234); doc.text('D & R E.I.R.L.', 14, y); y += 10;
-        doc.setFontSize(14); doc.setTextColor(0); doc.text('Reporte de Ventas', 14, y); y += 10;
-        doc.setFontSize(10); doc.setTextColor(100); doc.text(`Fecha: ${new Date().toLocaleDateString('es-PE')}`, 14, y); y += 15;
-        doc.setFontSize(12); doc.text('Resumen:', 14, y); y += 8;
+
+        // ========== ENCABEZADO CON DISEÑO PROFESIONAL ==========
+        // Rectángulo de fondo para el header
+        doc.setFillColor(102, 126, 234);
+        doc.rect(0, 0, pageWidth, 45, 'F');
+
+        // Logo/Nombre de la empresa (blanco)
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(22);
+        doc.setFont(undefined, 'bold');
+        doc.text('SOLUCIONES TECNOLÓGICAS E INFORMÁTICAS', pageWidth / 2, 15, { align: 'center' });
+
+        doc.setFontSize(16);
+        doc.text('D & R E.I.R.L.', pageWidth / 2, 25, { align: 'center' });
+
+        // RUC y datos de contacto
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        doc.text('RUC: 20611214856 | Tel:922518956 | serviciotecnicoroger@gmail.com', pageWidth / 2, 35, { align: 'center' });
+
+        // Línea decorativa
+        doc.setDrawColor(255, 255, 255);
+        doc.setLineWidth(0.5);
+        doc.line(14, 40, pageWidth - 14, 40);
+
+        y = 55;
+
+        // ========== TÍTULO DEL REPORTE ==========
+        doc.setTextColor(102, 126, 234);
+        doc.setFontSize(18);
+        doc.setFont(undefined, 'bold');
+        doc.text('REPORTE DE VENTAS', 14, y);
+        y += 3;
+
+        // Línea debajo del título
+        doc.setDrawColor(102, 126, 234);
+        doc.setLineWidth(1);
+        doc.line(14, y, 80, y);
+        y += 10;
+
+        // ========== INFORMACIÓN DEL REPORTE ==========
+        doc.setTextColor(80, 80, 80);
         doc.setFontSize(10);
-        doc.text(`Total Ventas: ${reportData.totalSales}`, 20, y); y += 6;
-        doc.text(`Ingresos: S/ ${reportData.totalRevenue.toFixed(2)}`, 20, y); y += 6;
-        doc.text(`Productos Vendidos: ${reportData.totalQuantity}`, 20, y); y += 15;
-        doc.setFontSize(12); doc.text('Top 5 Productos:', 14, y); y += 8;
-        doc.setFontSize(10);
-        reportData.topProducts.forEach((p, i) => {
-            doc.text(`${i + 1}. ${p.name} - Cant: ${p.quantity} - S/ ${p.revenue.toFixed(2)}`, 20, y);
+        doc.setFont(undefined, 'normal');
+
+        const reportInfo = [
+            ['Fecha de generación:', new Date().toLocaleString('es-PE', {
+                dateStyle: 'full',
+                timeStyle: 'short'
+            })],
+            ['Generado por:', user?.name || 'Sistema'],
+            ['Período:', dateRange.startDate && dateRange.endDate
+                ? `${dateRange.startDate} al ${dateRange.endDate}`
+                : 'Todos los registros']
+        ];
+
+        reportInfo.forEach(([label, value]) => {
+            doc.setFont(undefined, 'bold');
+            doc.text(label, 14, y);
+            doc.setFont(undefined, 'normal');
+            doc.text(value, 70, y);
             y += 6;
         });
-        doc.save(`reporte_ventas_${new Date().toISOString().split('T')[0]}.pdf`);
+
+        y += 8;
+
+        // ========== RESUMEN EJECUTIVO CON CAJAS ==========
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(102, 126, 234);
+        doc.text('RESUMEN EJECUTIVO', 14, y);
+        y += 8;
+
+        // Cajas de estadísticas
+        const boxWidth = (pageWidth - 42) / 3;
+        const boxHeight = 25;
+        const startX = 14;
+
+        const stats = [
+            { label: 'TOTAL VENTAS', value: reportData.totalSales, color: [102, 126, 234] },
+            { label: 'INGRESOS TOTALES', value: `S/ ${reportData.totalRevenue.toFixed(2)}`, color: [0, 204, 102] },
+            { label: 'PRODUCTOS VENDIDOS', value: reportData.totalQuantity, color: [255, 170, 0] }
+        ];
+
+        stats.forEach((stat, index) => {
+            const boxX = startX + (boxWidth + 7) * index;
+
+            // Caja con borde
+            doc.setDrawColor(stat.color[0], stat.color[1], stat.color[2]);
+            doc.setLineWidth(0.5);
+            doc.setFillColor(250, 250, 255);
+            doc.roundedRect(boxX, y, boxWidth, boxHeight, 3, 3, 'FD');
+
+            // Label
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.setFont(undefined, 'normal');
+            doc.text(stat.label, boxX + boxWidth / 2, y + 8, { align: 'center' });
+
+            // Valor
+            doc.setFontSize(16);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(stat.color[0], stat.color[1], stat.color[2]);
+            doc.text(String(stat.value), boxX + boxWidth / 2, y + 18, { align: 'center' });
+        });
+
+        y += boxHeight + 15;
+
+        // ========== TOP 5 PRODUCTOS ==========
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(102, 126, 234);
+        doc.text('TOP 5 PRODUCTOS MÁS VENDIDOS', 14, y);
+        y += 8;
+
+        // Tabla de top productos
+        const tableStartY = y;
+        const colWidths = [100, 40, 45];
+        const rowHeight = 8;
+
+        // Header de la tabla
+        doc.setFillColor(102, 126, 234);
+        doc.rect(14, y, pageWidth - 28, rowHeight, 'F');
+
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.text('PRODUCTO', 16, y + 5.5);
+        doc.text('CANTIDAD', 116, y + 5.5);
+        doc.text('INGRESOS (S/)', 156, y + 5.5);
+
+        y += rowHeight;
+
+        // Filas de datos
+        doc.setTextColor(50, 50, 50);
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(9);
+
+        reportData.topProducts.forEach((product, index) => {
+            // Alternar color de fondo
+            if (index % 2 === 0) {
+                doc.setFillColor(245, 247, 255);
+                doc.rect(14, y, pageWidth - 28, rowHeight, 'F');
+            }
+
+            // Truncar nombre si es muy largo
+            const productName = product.name.length > 35
+                ? product.name.substring(0, 32) + '...'
+                : product.name;
+
+            doc.text(productName, 16, y + 5.5);
+            doc.text(String(product.quantity), 116, y + 5.5);
+            doc.text(product.revenue.toFixed(2), 156, y + 5.5);
+
+            y += rowHeight;
+        });
+
+        // Borde de la tabla
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.1);
+        doc.rect(14, tableStartY, pageWidth - 28, y - tableStartY);
+
+        y += 10;
+
+        // ========== DETALLE DE VENTAS (si hay espacio) ==========
+        if (reportData.sales && reportData.sales.length > 0 && y < pageHeight - 60) {
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(102, 126, 234);
+            doc.text('DETALLE DE VENTAS RECIENTES', 14, y);
+            y += 8;
+
+            const salesTableStartY = y;
+            const salesRowHeight = 7;
+
+            // Header
+            doc.setFillColor(102, 126, 234);
+            doc.rect(14, y, pageWidth - 28, salesRowHeight, 'F');
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(8);
+            doc.setFont(undefined, 'bold');
+            doc.text('ID', 16, y + 4.5);
+            doc.text('PRODUCTO', 30, y + 4.5);
+            doc.text('CANT.', 100, y + 4.5);
+            doc.text('TOTAL', 120, y + 4.5);
+            doc.text('FECHA', 145, y + 4.5);
+            doc.text('VENDEDOR', 170, y + 4.5);
+
+            y += salesRowHeight;
+
+            // Mostrar solo las últimas 10 ventas
+            const recentSales = reportData.sales.slice(0, 10);
+            doc.setTextColor(50, 50, 50);
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(8);
+
+            recentSales.forEach((sale, index) => {
+                // Verificar si necesitamos nueva página
+                if (y > pageHeight - 30) {
+                    doc.addPage();
+                    y = 20;
+                }
+
+                if (index % 2 === 0) {
+                    doc.setFillColor(245, 247, 255);
+                    doc.rect(14, y, pageWidth - 28, salesRowHeight, 'F');
+                }
+
+                const productName = (sale.productName || '').length > 20
+                    ? (sale.productName || '').substring(0, 17) + '...'
+                    : (sale.productName || 'N/A');
+
+                doc.text(String(sale.id), 16, y + 4.5);
+                doc.text(productName, 30, y + 4.5);
+                doc.text(String(sale.quantity), 100, y + 4.5);
+                doc.text(`S/ ${sale.totalPrice.toFixed(2)}`, 120, y + 4.5);
+                doc.text(sale.date || 'N/A', 145, y + 4.5);
+                doc.text((sale.seller || 'N/A').substring(0, 15), 170, y + 4.5);
+
+                y += salesRowHeight;
+            });
+
+            // Borde de la tabla
+            doc.setDrawColor(200, 200, 200);
+            doc.setLineWidth(0.1);
+            const tableHeight = y - salesTableStartY;
+            doc.rect(14, salesTableStartY, pageWidth - 28, tableHeight);
+        }
+
+        // ========== PIE DE PÁGINA ==========
+        const footerY = pageHeight - 20;
+
+        // Línea superior del footer
+        doc.setDrawColor(102, 126, 234);
+        doc.setLineWidth(0.5);
+        doc.line(14, footerY - 5, pageWidth - 14, footerY - 5);
+
+        doc.setTextColor(100, 100, 100);
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'italic');
+        doc.text('Este documento ha sido generado automáticamente por el Sistema de Gestión de Inventarios',
+            pageWidth / 2, footerY, { align: 'center' });
+
+        doc.setFont(undefined, 'normal');
+        doc.text(`Página 1 | ${new Date().toLocaleDateString('es-PE')}`,
+            pageWidth / 2, footerY + 5, { align: 'center' });
+
+        // ========== GUARDAR PDF ==========
+        const fileName = `Reporte_Ventas_DyR_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(fileName);
     };
 
     if (loading) return <div className="loading">Cargando...</div>;
