@@ -1,26 +1,16 @@
-const express = require('express');
-const router = express.Router();
-const { authMiddleware, checkRole } = require('../middleware/auth');
-const {
-    getSales,
-    getSaleById,
-    createSale,
-    getSalesReport
-} = require('../controllers/sales-controller');
+// RUTAS DE VENTAS
 
-// Todas las rutas requieren autenticación
-router.use(authMiddleware);
+const express = require("express")
+const router = express.Router()
+const { authMiddleware, checkRole } = require("../middleware/auth")
+const { getSales, createSale } = require("../controllers/sales-controller")
 
-// GET /api/sales - Obtener todas las ventas
-router.get('/', getSales);
+router.use(authMiddleware)
 
-// GET /api/sales/report - Obtener reporte de ventas
-router.get('/report', getSalesReport);
+// Lectura - Todos autenticados
+router.get("/", getSales)
 
-// GET /api/sales/:id - Obtener una venta por ID
-router.get('/:id', getSaleById);
+// Crear venta - Empleado o admin
+router.post("/", checkRole("administrador", "empleado"), createSale)
 
-// POST /api/sales - Registrar nueva venta
-router.post('/', createSale);
-
-module.exports = router;
+module.exports = router

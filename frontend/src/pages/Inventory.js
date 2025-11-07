@@ -1,242 +1,268 @@
-import React, { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { inventoryService } from '../services/api';
-import { useNavigate } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import './Inventory.css';
+"use client"
+
+import { useEffect, useState } from "react"
+import { useAuth } from "../context/AuthContext"
+import { inventoryService } from "../services/api"
+import { useNavigate } from "react-router-dom"
+import { FiMenu, FiChevronLeft, FiSearch, FiFilter, FiEdit, FiTrash2, FiPackage } from "react-icons/fi"
+import "./Inventory.css"
 
 const Inventory = () => {
-    const { user } = useAuth();
-    const navigate = useNavigate();
-    const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [showModal, setShowModal] = useState(false);
-    const [editingProduct, setEditingProduct] = useState(null);
-    const [formData, setFormData] = useState({
-        name: '',
-        sku: '',
-        category: '',
-        stock: '',
-        minStock: '',
-        price: '',
-        expiryDate: '',
-        supplier: ''
-    });
-    const [isCollapsed, setIsCollapsed] = useState(false); // Para colapsar sidebar
+    const { user } = useAuth()
+    const navigate = useNavigate()
+    const [products, setProducts] = useState([])
+    const [filteredProducts, setFilteredProducts] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [searchTerm, setSearchTerm] = useState("")
+    const [showModal, setShowModal] = useState(false)
+    const [editingProduct, setEditingProduct] = useState(null)
+    const [formData, setFormData] = useState({ sku: "", name: "", category: "", stock: "", minStock: "", price: "" })
+    const [isCollapsed, setIsCollapsed] = useState(false)
 
     useEffect(() => {
-        loadProducts();
-    }, []);
+        loadProducts()
+    }, [])
 
     const loadProducts = async () => {
         try {
-            const response = await inventoryService.getProducts();
-            const productsList = Array.isArray(response.data.products)
-                ? response.data.products
-                : [];
-            setProducts(productsList);
-            setLoading(false);
+            const res = await inventoryService.getProducts()
+            const productsWithId = (res.data.products || []).map((p, i) => ({
+                ...p,
+                id: p.id || i + 1,
+                sku: p.sku || `SKU-${String(i + 1).padStart(3, "0")}`,
+            }))
+            setProducts(productsWithId)
+            setFilteredProducts(productsWithId)
+            setLoading(false)
         } catch (error) {
-            console.error('Error al cargar productos:', error);
-            setProducts([]);
-            setLoading(false);
+            alert("Error al cargar productos")
+            setLoading(false)
         }
-    };
+    }
 
-    const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+    const toggleSidebar = () => setIsCollapsed(!isCollapsed)
+
+    const handleSearch = (e) => {
+        const term = e.target.value.toLowerCase()
+        setSearchTerm(term)
+        const filtered = products.filter((p) => p.name.toLowerCase().includes(term) || p.sku.toLowerCase().includes(term))
+        setFilteredProducts(filtered)
+    }
 
     const openModal = (product = null) => {
         if (product) {
-            setEditingProduct(product);
-            setFormData(product);
-        } else {
-            setEditingProduct(null);
+            setEditingProduct(product)
             setFormData({
-                name: '',
-                sku: '',
-                category: '',
-                stock: '',
-                minStock: '',
-                price: '',
-                expiryDate: '',
-                supplier: ''
-            });
+                sku: product.sku,
+                name: product.name,
+                category: product.category || "Alimentos",
+                stock: product.stock,
+                minStock: product.minStock,
+                price: product.price,
+            })
+        } else {
+            setEditingProduct(null)
+            setFormData({ sku: "", name: "", category: "Alimentos", stock: "", minStock: "", price: "" })
         }
-        setShowModal(true);
-    };
+        setShowModal(true)
+    }
 
     const closeModal = () => {
-        setShowModal(false);
-        setEditingProduct(null);
-    };
-
-    const handleInputChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
-    };
+        setShowModal(false)
+        setEditingProduct(null)
+    }
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        e.preventDefault()
         try {
             if (editingProduct) {
-                await inventoryService.updateProduct(editingProduct.id, formData);
+                await inventoryService.updateProduct(editingProduct.id, formData)
             } else {
-                await inventoryService.createProduct(formData);
+                await inventoryService.createProduct(formData)
             }
-            loadProducts();
-            closeModal();
+            loadProducts()
+            closeModal()
         } catch (error) {
-            console.error('Error al guardar producto:', error);
-            alert('Error al guardar el producto');
+            alert(error.response?.data?.message || "Error al guardar producto")
         }
-    };
+    }
 
     const handleDelete = async (id) => {
-        if (window.confirm('¿Estás seguro de eliminar este producto?')) {
+        if (window.confirm("¿Eliminar este producto?")) {
             try {
-                await inventoryService.deleteProduct(id);
-                loadProducts();
+                await inventoryService.deleteProduct(id)
+                loadProducts()
             } catch (error) {
-                console.error('Error al eliminar producto:', error);
-                alert('Error al eliminar el producto');
+                alert("Error al eliminar")
             }
         }
-    };
+    }
 
-    if (loading) {
-        return <div className="loading">Cargando...</div>;
+    const getStockColor = (stock, minStock) => {
+        if (stock <= minStock) return "low"
+        if (stock <= minStock * 1.5) return "medium"
+        return "high"
     }
 
     return (
-        <div className="app-container">
-            {/* Sidebar reutilizable */}
-            <Sidebar isCollapsed={isCollapsed} toggleSidebar={toggleSidebar} />
+        <div className="dashboard-wrapper">
+            {/* SIDEBAR */}
+            <aside className={`sidebar ${isCollapsed ? "closed" : "open"}`}>
+                <div className="sidebar-header">
+                    <div className="logo-container">
+                        <img src="/as.png" alt="Logo" className="logo-image" />
+                    </div>
+                    <button className="toggle-btn" onClick={toggleSidebar}>
+                        {isCollapsed ? <FiChevronLeft size={22} /> : <FiMenu size={22} />}
+                    </button>
+                </div>
 
-            {/* Contenido principal */}
-            <div className={`main-content ${isCollapsed ? 'expanded' : ''}`}>
+                <nav className="sidebar-nav">
+                    <button onClick={() => navigate("/dashboard")} className="nav-item">
+                        Inicio
+                    </button>
+                    <button className="nav-item active">Inventario</button>
+                    <button onClick={() => navigate("/sales")} className="nav-item">
+                        Ventas
+                    </button>
+                    <button onClick={() => navigate("/predictions")} className="nav-item">
+                        Predicciones
+                    </button>
+                    <button onClick={() => navigate("/purchases")} className="nav-item">Lista de Compras</button>
+                </nav>
+
+                <div className="sidebar-footer">
+                    <select className="user-select">
+                        <option>Admin</option>
+                    </select>
+                </div>
+            </aside>
+
+            {/* CONTENIDO */}
+            <div className={`content-area ${isCollapsed ? "collapsed" : ""}`}>
                 <header className="page-header">
-                    <h1>Inventario de Productos</h1>
+                    <div className="title-section">
+                        <h1>Gestión de Inventario</h1>
+                        <p>Total de productos: {products.length}</p>
+                    </div>
+                    <button onClick={() => openModal()} className="btn-new-product">
+                        + Crear Producto
+                    </button>
                 </header>
 
-                <div className="inventory-content">
-                    <div className="header">
-                        {/* BOTÓN SIEMPRE VISIBLE PARA TODOS */}
-                        <button onClick={() => openModal()} className="btn-primary">
-                            + Nuevo Producto
-                        </button>
+                {/* BARRA DE BÚSQUEDA */}
+                <div className="search-bar">
+                    <div className="search-input-wrapper">
+                        <FiSearch className="search-icon" />
+                        <input
+                            type="text"
+                            placeholder="Buscar por nombre o SKU..."
+                            value={searchTerm}
+                            onChange={handleSearch}
+                            className="search-input"
+                        />
                     </div>
+                    <button className="btn-filter">
+                        <FiFilter size={18} /> Filtrar
+                    </button>
+                </div>
 
-                    <div className="products-table">
-                        <table>
-                            <thead>
+                {/* TABLA */}
+                <div className="table-container">
+                    <table className="inventory-table">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>Stock Actual</th>
+                                <th>Mínimo</th>
+                                <th>Precio</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredProducts.length === 0 ? (
                                 <tr>
-                                    <th>SKU</th>
-                                    <th>Nombre</th>
-                                    <th>Categoría</th>
-                                    <th>Stock</th>
-                                    <th>Mín. Stock</th>
-                                    <th>Precio</th>
-                                    <th>Proveedor</th>
-                                    <th>Vencimiento</th>
-                                    <th>Acciones</th>
+                                    <td colSpan="7" className="no-data">
+                                        No se encontraron productos
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {Array.isArray(products) && products.length > 0 ? (
-                                    products.map(product => (
-                                        <tr key={product.id} className={product.stock < product.minStock ? 'low-stock' : ''}>
-                                            <td>{product.sku}</td>
-                                            <td>{product.name}</td>
-                                            <td>{product.category}</td>
-                                            <td>{product.stock}</td>
-                                            <td>{product.minStock}</td>
-                                            <td>S/ {product.price}</td>
-                                            <td>{product.supplier}</td>
-                                            <td>{product.expiryDate || 'N/A'}</td>
-                                            <td className="actions">
-                                                <button onClick={() => openModal(product)} className="btn-edit">
-                                                    Editar
-                                                </button>
-                                                <button onClick={() => handleDelete(product.id)} className="btn-delete">
-                                                    Eliminar
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan="9" style={{ textAlign: 'center', padding: '20px' }}>
-                                            No hay productos en el inventario
+                            ) : (
+                                filteredProducts.map((p) => (
+                                    <tr key={p.id}>
+                                        <td className="sku">{p.sku}</td>
+                                        <td className="product-name">{p.name}</td>
+                                        <td>{p.category || "Alimentos"}</td>
+                                        <td>
+                                            <span className={`stock-badge ${getStockColor(p.stock, p.minStock)}`}>{p.stock}</span>
+                                        </td>
+                                        <td>{p.minStock}</td>
+                                        <td>S/ {Number.parseFloat(p.price).toFixed(2)}</td>
+                                        <td className="actions">
+                                            <button onClick={() => openModal(p)} className="btn-edit" title="Editar">
+                                                <FiEdit size={16} />
+                                            </button>
+                                            <button onClick={() => handleDelete(p.id)} className="btn-delete" title="Eliminar">
+                                                <FiTrash2 size={16} />
+                                            </button>
+                                            <button className="btn-stock" title="Ajustar Stock">
+                                                <FiPackage size={16} />
+                                            </button>
                                         </td>
                                     </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            {/* Modal */}
+            {/* MODAL */}
             {showModal && (
-                <div className="modal">
+                <div className="modal-overlay">
                     <div className="modal-content">
-                        <h3>{editingProduct ? 'Editar Producto' : 'Nuevo Producto'}</h3>
+                        <h3>{editingProduct ? "Editar Producto" : "Crear Producto"}</h3>
                         <form onSubmit={handleSubmit}>
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Nombre</label>
-                                    <input
-                                        type="text"
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </div>
+                            <div className="form-grid">
                                 <div className="form-group">
                                     <label>SKU</label>
                                     <input
-                                        type="text"
                                         name="sku"
                                         value={formData.sku}
-                                        onChange={handleInputChange}
+                                        onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
                                         required
                                     />
                                 </div>
-                            </div>
-
-                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Nombre</label>
+                                    <input
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        required
+                                    />
+                                </div>
                                 <div className="form-group">
                                     <label>Categoría</label>
-                                    <input
-                                        type="text"
+                                    <select
                                         name="category"
                                         value={formData.category}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
+                                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                    >
+                                        <option>Alimentos</option>
+                                        <option>Bebidas</option>
+                                        <option>Limpieza</option>
+                                        <option>Otros</option>
+                                    </select>
                                 </div>
                                 <div className="form-group">
-                                    <label>Proveedor</label>
-                                    <input
-                                        type="text"
-                                        name="supplier"
-                                        value={formData.supplier}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Stock</label>
+                                    <label>Stock Actual</label>
                                     <input
                                         type="number"
                                         name="stock"
                                         value={formData.stock}
-                                        onChange={handleInputChange}
+                                        onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                                         required
                                     />
                                 </div>
@@ -246,12 +272,10 @@ const Inventory = () => {
                                         type="number"
                                         name="minStock"
                                         value={formData.minStock}
-                                        onChange={handleInputChange}
+                                        onChange={(e) => setFormData({ ...formData, minStock: e.target.value })}
+                                        required
                                     />
                                 </div>
-                            </div>
-
-                            <div className="form-row">
                                 <div className="form-group">
                                     <label>Precio</label>
                                     <input
@@ -259,27 +283,17 @@ const Inventory = () => {
                                         step="0.01"
                                         name="price"
                                         value={formData.price}
-                                        onChange={handleInputChange}
+                                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                                         required
                                     />
                                 </div>
-                                <div className="form-group">
-                                    <label>Fecha de Vencimiento</label>
-                                    <input
-                                        type="date"
-                                        name="expiryDate"
-                                        value={formData.expiryDate}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
                             </div>
-
                             <div className="modal-actions">
-                                <button type="button" onClick={closeModal} className="btn-secondary">
+                                <button type="button" onClick={closeModal} className="btn-cancel">
                                     Cancelar
                                 </button>
-                                <button type="submit" className="btn-primary">
-                                    {editingProduct ? 'Actualizar' : 'Crear'}
+                                <button type="submit" className="btn-submit">
+                                    {editingProduct ? "Actualizar" : "Crear"}
                                 </button>
                             </div>
                         </form>
@@ -287,7 +301,7 @@ const Inventory = () => {
                 </div>
             )}
         </div>
-    );
-};
+    )
+}
 
-export default Inventory;
+export default Inventory

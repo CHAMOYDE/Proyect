@@ -1,8 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const { login } = require('../controllers/auth-controller');
+// RUTAS DE AUTENTICACIÓN
+// Solo login, el resto se maneja en otros controladores
 
-// POST /api/auth/login
-router.post('/login', login);
+const express = require("express")
+const router = express.Router()
+const { login } = require("../controllers/auth-controller")
 
-module.exports = router;
+// POST /api/auth/login - Iniciar sesión
+router.post("/login", login)
+
+module.exports = router

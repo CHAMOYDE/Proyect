@@ -1,153 +1,89 @@
-let { sales, products } = require('../config/db');
+// CONTROLADOR DE VENTAS
+// Maneja registro, lectura y reportes de ventas
 
-// Obtener todas las ventas
-const getSales = (req, res) => {
-    try {
-        res.json({
-            success: true,
-            sales
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Error al obtener ventas' });
+const sql = require("mssql")
+const pool = require("../config/db")
+
+// CAMBIAR: Tablas: ventas, productos. Columnas: venta_id, producto_id, cantidad, total, fecha_venta
+
+const getSales = async (req, res) => {
+  try {
+    const result = await pool.request().query(`
+            SELECT 
+                v.venta_id AS id,
+                v.producto_id AS productId,
+                p.nombre AS productName,
+                v.cantidad AS quantity,
+                v.total AS totalPrice,
+                v.fecha_venta AS date
+            FROM inventario.ventas v
+            INNER JOIN inventario.productos p ON v.producto_id = p.id
+            ORDER BY v.fecha_venta DESC
+        `)
+
+    res.json({ success: true, data: result.recordset })
+  } catch (error) {
+    console.error("[SALES] Error obtener ventas:", error)
+    res.status(500).json({ success: false, message: "Error al obtener ventas" })
+  }
+}
+
+const createSale = async (req, res) => {
+  try {
+    const { productId, quantity } = req.body
+
+    if (!productId || !quantity) {
+      return res.status(400).json({ success: false, message: "Faltan datos" })
     }
-};
 
-// Obtener una venta por ID
-const getSaleById = (req, res) => {
-    try {
-        const sale = sales.find(s => s.id === parseInt(req.params.id));
+    // CAMBIAR: Obtén el producto con tus columnas reales
+    const productResult = await pool
+      .request()
+      .input("id", sql.Int, productId)
+      .query("SELECT * FROM inventario.productos WHERE producto_id = @id")
 
-        if (!sale) {
-            return res.status(404).json({ message: 'Venta no encontrada' });
-        }
-
-        res.json({
-            success: true,
-            sale
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Error al obtener la venta' });
+    if (productResult.recordset.length === 0) {
+      return res.status(404).json({ success: false, message: "Producto no encontrado" })
     }
-};
 
-// Registrar una nueva venta
-const createSale = (req, res) => {
-    try {
-        const { productId, quantity } = req.body;
+    const product = productResult.recordset[0]
 
-        if (!productId || !quantity) {
-            return res.status(400).json({ message: 'Faltan campos obligatorios' });
-        }
-
-        // Buscar el producto
-        const productIndex = products.findIndex(p => p.id === parseInt(productId));
-
-        if (productIndex === -1) {
-            return res.status(404).json({ message: 'Producto no encontrado' });
-        }
-
-        const product = products[productIndex];
-
-        // Verificar stock disponible
-        if (product.stock < quantity) {
-            return res.status(400).json({
-                message: 'Stock insuficiente',
-                available: product.stock,
-                requested: quantity
-            });
-        }
-
-        // Calcular precio total
-        const totalPrice = product.price * quantity;
-
-        // Generar nuevo ID para la venta
-        const newId = sales.length > 0 ? Math.max(...sales.map(s => s.id)) + 1 : 1;
-
-        // Crear la venta
-        const newSale = {
-            id: newId,
-            productId: product.id,
-            productName: product.name,
-            quantity: parseInt(quantity),
-            totalPrice,
-            date: new Date().toISOString().split('T')[0],
-            seller: req.user.name
-        };
-
-        // Reducir el stock del producto
-        products[productIndex].stock -= quantity;
-
-        // Agregar la venta
-        sales.push(newSale);
-
-        res.status(201).json({
-            success: true,
-            message: 'Venta registrada exitosamente',
-            sale: newSale,
-            productStock: products[productIndex].stock
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error al registrar la venta' });
+    // Verificar stock
+    if (product.stock_actual < quantity) {
+      return res.status(400).json({
+        success: false,
+        message: "Stock insuficiente",
+        disponible: product.stock_actual,
+      })
     }
-};
 
-// Obtener reporte de ventas
-const getSalesReport = (req, res) => {
-    try {
-        const { startDate, endDate } = req.query;
+    const total = product.precio_venta * quantity
 
-        let filteredSales = sales;
+    // Registrar venta
+    await pool
+      .request()
+      .input("producto_id", sql.Int, productId)
+      .input("cantidad", sql.Int, quantity)
+      .input("total", sql.Decimal(10, 2), total)
+      .input("fecha_venta", sql.DateTime, new Date())
+      .query(`
+                INSERT INTO inventario.ventas 
+                (producto_id, cantidad, total, fecha_venta)
+                VALUES (@producto_id, @cantidad, @total, @fecha_venta)
+            `)
 
-        // Filtrar por fechas si se proporcionan
-        if (startDate) {
-            filteredSales = filteredSales.filter(s => s.date >= startDate);
-        }
-        if (endDate) {
-            filteredSales = filteredSales.filter(s => s.date <= endDate);
-        }
+    // Actualizar stock
+    await pool
+      .request()
+      .input("id", sql.Int, productId)
+      .input("nuevoStock", sql.Int, product.stock_actual - quantity)
+      .query("UPDATE inventario.productos SET stock_actual = @nuevoStock WHERE producto_id = @id")
 
-        // Calcular estadísticas
-        const totalSales = filteredSales.length;
-        const totalRevenue = filteredSales.reduce((sum, sale) => sum + sale.totalPrice, 0);
-        const totalQuantity = filteredSales.reduce((sum, sale) => sum + sale.quantity, 0);
+    res.status(201).json({ success: true, message: "Venta registrada" })
+  } catch (error) {
+    console.error("[SALES] Error crear venta:", error)
+    res.status(500).json({ success: false, message: "Error al registrar venta" })
+  }
+}
 
-        // Productos más vendidos
-        const productSales = {};
-        filteredSales.forEach(sale => {
-            if (!productSales[sale.productName]) {
-                productSales[sale.productName] = {
-                    name: sale.productName,
-                    quantity: 0,
-                    revenue: 0
-                };
-            }
-            productSales[sale.productName].quantity += sale.quantity;
-            productSales[sale.productName].revenue += sale.totalPrice;
-        });
-
-        const topProducts = Object.values(productSales)
-            .sort((a, b) => b.quantity - a.quantity)
-            .slice(0, 5);
-
-        res.json({
-            success: true,
-            report: {
-                totalSales,
-                totalRevenue,
-                totalQuantity,
-                topProducts,
-                sales: filteredSales
-            }
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Error al generar el reporte' });
-    }
-};
-
-module.exports = {
-    getSales,
-    getSaleById,
-    createSale,
-    getSalesReport
-};
+module.exports = { getSales, createSale }

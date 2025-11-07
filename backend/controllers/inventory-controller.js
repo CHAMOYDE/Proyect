@@ -1,159 +1,178 @@
-let { products } = require('../config/db');
+// CONTROLADOR DE INVENTARIO
+// Gestiona productos: crear, leer, actualizar, eliminar
 
-// Obtener todos los productos
-const getProducts = (req, res) => {
-    try {
-        res.json({
-            success: true,
-            products
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Error al obtener productos' });
+const sql = require("mssql")
+const pool = require("../config/db")
+
+// CAMBIAR: Reemplaza estos nombres de columnas con los de tu BD
+// Columnas esperadas: producto_id, codigo_sku, nombre, categoria, precio_venta, stock_actual, stock_minimo, proveedor
+
+const getProducts = async (req, res) => {
+  try {
+    const result = await pool.request().query(`
+            SELECT 
+                producto_id AS id,
+                codigo_sku AS sku,
+                nombre,
+                categoria,
+                precio_venta AS price,
+                stock_actual AS stock,
+                stock_minimo AS minStock,
+                proveedor AS supplier
+            FROM inventario.productos
+            WHERE activo = 1
+            ORDER BY nombre ASC
+        `)
+
+    res.json({ success: true, data: result.recordset })
+  } catch (error) {
+    console.error("[INVENTORY] Error obtener productos:", error)
+    res.status(500).json({ success: false, message: "Error al obtener productos" })
+  }
+}
+
+const getProductById = async (req, res) => {
+  try {
+    const { id } = req.params
+    const result = await pool
+      .request()
+      .input("id", sql.Int, Number.parseInt(id))
+      .query(`
+                SELECT 
+                    producto_id AS id,
+                    codigo_sku AS sku,
+                    nombre,
+                    categoria,
+                    precio_venta AS price,
+                    stock_actual AS stock,
+                    stock_minimo AS minStock,
+                    proveedor AS supplier
+                FROM inventario.productos
+                WHERE producto_id = @id AND activo = 1
+            `)
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ success: false, message: "Producto no encontrado" })
     }
-};
 
-// Obtener un producto por ID
-const getProductById = (req, res) => {
-    try {
-        const product = products.find(p => p.id === parseInt(req.params.id));
+    res.json({ success: true, data: result.recordset[0] })
+  } catch (error) {
+    console.error("[INVENTORY] Error obtener producto:", error)
+    res.status(500).json({ success: false, message: "Error al obtener producto" })
+  }
+}
 
-        if (!product) {
-            return res.status(404).json({ message: 'Producto no encontrado' });
-        }
+const createProduct = async (req, res) => {
+  try {
+    const { nombre, codigo_sku, categoria, precio_venta, stock_actual, stock_minimo, proveedor } = req.body
 
-        res.json({
-            success: true,
-            product
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Error al obtener el producto' });
+    // CAMBIAR: Valida según tu lógica de negocio
+    if (!nombre || !codigo_sku || !precio_venta) {
+      return res.status(400).json({ success: false, message: "Campos requeridos faltantes" })
     }
-};
 
-// Crear un nuevo producto
-const createProduct = (req, res) => {
-    try {
-        const { name, sku, category, stock, minStock, price, expiryDate, supplier } = req.body;
+    await pool
+      .request()
+      .input("codigo_sku", sql.NVarChar(50), codigo_sku)
+      .input("nombre", sql.NVarChar(200), nombre)
+      .input("categoria", sql.NVarChar(50), categoria || "general")
+      .input("precio_venta", sql.Decimal(10, 2), precio_venta)
+      .input("stock_actual", sql.Int, stock_actual || 0)
+      .input("stock_minimo", sql.Int, stock_minimo || 1)
+      .input("proveedor", sql.NVarChar(100), proveedor || "")
+      .query(`
+                INSERT INTO inventario.productos 
+                (codigo_sku, nombre, categoria, precio_venta, stock_actual, stock_minimo, proveedor, activo)
+                VALUES (@codigo_sku, @nombre, @categoria, @precio_venta, @stock_actual, @stock_minimo, @proveedor, 1)
+            `)
 
-        // Validación básica
-        if (!name || !sku || !category || stock === undefined || !price) {
-            return res.status(400).json({ message: 'Faltan campos obligatorios' });
-        }
+    res.status(201).json({ success: true, message: "Producto creado" })
+  } catch (error) {
+    console.error("[INVENTORY] Error crear producto:", error)
+    res.status(500).json({ success: false, message: "Error al crear producto" })
+  }
+}
 
-        // Generar nuevo ID
-        const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { nombre, codigo_sku, categoria, precio_venta, stock_actual, stock_minimo, proveedor } = req.body
 
-        const newProduct = {
-            id: newId,
-            name,
-            sku,
-            category,
-            stock: parseInt(stock),
-            minStock: parseInt(minStock) || 0,
-            price: parseFloat(price),
-            expiryDate: expiryDate || null,
-            supplier: supplier || ''
-        };
+    // CAMBIAR: Actualiza con tus columnas reales
+    await pool
+      .request()
+      .input("id", sql.Int, Number.parseInt(id))
+      .input("nombre", sql.NVarChar(200), nombre)
+      .input("codigo_sku", sql.NVarChar(50), codigo_sku)
+      .input("categoria", sql.NVarChar(50), categoria)
+      .input("precio_venta", sql.Decimal(10, 2), precio_venta)
+      .input("stock_actual", sql.Int, stock_actual)
+      .input("stock_minimo", sql.Int, stock_minimo)
+      .input("proveedor", sql.NVarChar(100), proveedor)
+      .query(`
+                UPDATE inventario.productos
+                SET 
+                    nombre = @nombre,
+                    codigo_sku = @codigo_sku,
+                    categoria = @categoria,
+                    precio_venta = @precio_venta,
+                    stock_actual = @stock_actual,
+                    stock_minimo = @stock_minimo,
+                    proveedor = @proveedor
+                WHERE producto_id = @id
+            `)
 
-        products.push(newProduct);
+    res.json({ success: true, message: "Producto actualizado" })
+  } catch (error) {
+    console.error("[INVENTORY] Error actualizar:", error)
+    res.status(500).json({ success: false, message: "Error al actualizar" })
+  }
+}
 
-        res.status(201).json({
-            success: true,
-            message: 'Producto creado exitosamente',
-            product: newProduct
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Error al crear el producto' });
-    }
-};
+const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params
 
-// Actualizar un producto
-const updateProduct = (req, res) => {
-    try {
-        const productId = parseInt(req.params.id);
-        const productIndex = products.findIndex(p => p.id === productId);
+    // CAMBIAR: Usa soft delete (cambiar activo a 0) si tienes vendtas asociadas
+    await pool
+      .request()
+      .input("id", sql.Int, Number.parseInt(id))
+      .query("UPDATE inventario.productos SET activo = 0 WHERE producto_id = @id")
 
-        if (productIndex === -1) {
-            return res.status(404).json({ message: 'Producto no encontrado' });
-        }
+    res.json({ success: true, message: "Producto eliminado" })
+  } catch (error) {
+    console.error("[INVENTORY] Error eliminar:", error)
+    res.status(500).json({ success: false, message: "Error al eliminar" })
+  }
+}
 
-        const { name, sku, category, stock, minStock, price, expiryDate, supplier } = req.body;
+const getAlerts = async (req, res) => {
+  try {
+    // CAMBIAR: Productos con stock bajo
+    const result = await pool.request().query(`
+            SELECT 
+                producto_id AS id,
+                codigo_sku AS sku,
+                nombre,
+                stock_actual AS stock,
+                stock_minimo AS minStock
+            FROM inventario.productos
+            WHERE stock_actual <= stock_minimo AND activo = 1
+            ORDER BY stock_actual ASC
+        `)
 
-        products[productIndex] = {
-            ...products[productIndex],
-            name: name || products[productIndex].name,
-            sku: sku || products[productIndex].sku,
-            category: category || products[productIndex].category,
-            stock: stock !== undefined ? parseInt(stock) : products[productIndex].stock,
-            minStock: minStock !== undefined ? parseInt(minStock) : products[productIndex].minStock,
-            price: price !== undefined ? parseFloat(price) : products[productIndex].price,
-            expiryDate: expiryDate !== undefined ? expiryDate : products[productIndex].expiryDate,
-            supplier: supplier !== undefined ? supplier : products[productIndex].supplier
-        };
-
-        res.json({
-            success: true,
-            message: 'Producto actualizado exitosamente',
-            product: products[productIndex]
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Error al actualizar el producto' });
-    }
-};
-
-// Eliminar un producto
-const deleteProduct = (req, res) => {
-    try {
-        const productId = parseInt(req.params.id);
-        const productIndex = products.findIndex(p => p.id === productId);
-
-        if (productIndex === -1) {
-            return res.status(404).json({ message: 'Producto no encontrado' });
-        }
-
-        products.splice(productIndex, 1);
-
-        res.json({
-            success: true,
-            message: 'Producto eliminado exitosamente'
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Error al eliminar el producto' });
-    }
-};
-
-// Obtener alertas (productos con bajo stock o próximos a vencer)
-const getAlerts = (req, res) => {
-    try {
-        const today = new Date();
-        const thirtyDaysFromNow = new Date();
-        thirtyDaysFromNow.setDate(today.getDate() + 30);
-
-        const lowStockProducts = products.filter(p => p.stock < p.minStock);
-
-        const expiringProducts = products.filter(p => {
-            if (!p.expiryDate) return false;
-            const expiryDate = new Date(p.expiryDate);
-            return expiryDate <= thirtyDaysFromNow && expiryDate >= today;
-        });
-
-        res.json({
-            success: true,
-            alerts: {
-                lowStock: lowStockProducts,
-                expiringSoon: expiringProducts
-            }
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Error al obtener las alertas' });
-    }
-};
+    res.json({ success: true, data: result.recordset })
+  } catch (error) {
+    console.error("[INVENTORY] Error alertas:", error)
+    res.status(500).json({ success: false, message: "Error al obtener alertas" })
+  }
+}
 
 module.exports = {
-    getProducts,
-    getProductById,
-    createProduct,
-    updateProduct,
-    deleteProduct,
-    getAlerts
-};
+  getProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  getAlerts,
+}

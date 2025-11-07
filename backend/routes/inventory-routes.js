@@ -1,34 +1,29 @@
-const express = require('express');
-const router = express.Router();
-const { authMiddleware, checkRole } = require('../middleware/auth');
+// RUTAS DE INVENTARIO
+// CRUD de productos con protección de roles
+
+const express = require("express")
+const router = express.Router()
+const { authMiddleware, checkRole } = require("../middleware/auth")
 const {
-    getProducts,
-    getProductById,
-    createProduct,
-    updateProduct,
-    deleteProduct,
-    getAlerts
-} = require('../controllers/inventory-controller');
+  getProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  getAlerts,
+} = require("../controllers/inventory-controller")
 
-// Todas las rutas requieren autenticación
-router.use(authMiddleware);
+// Todas requieren autenticación
+router.use(authMiddleware)
 
-// GET /api/inventory - Obtener todos los productos
-router.get('/', getProducts);
+// GET - Lectura (todos autenticados)
+router.get("/", getProducts)
+router.get("/alerts", getAlerts)
+router.get("/:id", getProductById)
 
-// GET /api/inventory/alerts - Obtener alertas
-router.get('/alerts', getAlerts);
+// POST, PUT, DELETE - Solo admin
+router.post("/", checkRole("administrador"), createProduct)
+router.put("/:id", checkRole("administrador"), updateProduct)
+router.delete("/:id", checkRole("administrador"), deleteProduct)
 
-// GET /api/inventory/:id - Obtener un producto por ID
-router.get('/:id', getProductById);
-
-// POST /api/inventory - Crear producto (solo admin)
-router.post('/', checkRole('admin'), createProduct);
-
-// PUT /api/inventory/:id - Actualizar producto (solo admin)
-router.put('/:id', checkRole('admin'), updateProduct);
-
-// DELETE /api/inventory/:id - Eliminar producto (solo admin)
-router.delete('/:id', checkRole('admin'), deleteProduct);
-
-module.exports = router;
+module.exports = router

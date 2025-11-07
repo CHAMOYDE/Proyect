@@ -1,25 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.js';
+import { useAuth } from '../context/AuthContext';
 import './Login.css';
 
 const Login = () => {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [timeLeft, setTimeLeft] = useState(0);
     const [attempts, setAttempts] = useState(0);
     const [remaining, setRemaining] = useState(5);
+    const [isBlocked, setIsBlocked] = useState(false);
 
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    // Temporizador para el bloqueo
     useEffect(() => {
         if (timeLeft > 0) {
+            setIsBlocked(true);
             const timer = setInterval(() => {
-                setTimeLeft(prev => prev - 1);
+                setTimeLeft(prev => {
+                    if (prev <= 1) {
+                        setIsBlocked(false);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
             }, 1000);
             return () => clearInterval(timer);
         }
@@ -27,34 +34,37 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (isBlocked) return;
+
         setError('');
         setLoading(true);
 
-        const result = await login(username, password);
+        const result = await login(email, password);
 
         if (result.success) {
+            setAttempts(0);
+            setRemaining(5);
+            setTimeLeft(0);
+            setIsBlocked(false);
             navigate('/dashboard');
         } else {
-            // === CONTROL DE INTENTOS DESDE BACKEND ===
             const data = result.data || {};
-
             if (result.status === 429) {
-                // Bloqueado
-                setTimeLeft(data.timeLeft || 15);
+                const blockTime = data.timeLeft || 300;
+                setTimeLeft(blockTime);
                 setAttempts(data.attempts || 5);
-                setError(`Cuenta bloqueada. Espera ${data.timeLeft} segundos.`);
+                setError(`Cuenta bloqueada. Espera ${blockTime} segundos.`);
             } else if (result.status === 401) {
-                // Intento fallido
                 const newAttempts = data.attempts || (attempts + 1);
-                const newRemaining = data.remaining || (5 - newAttempts);
-
+                const newRemaining = 5 - newAttempts;
                 setAttempts(newAttempts);
                 setRemaining(newRemaining);
 
-                if (data.nextBlockTime) {
-                    setError(
-                        `¡Último intento! Si fallas, se bloqueará por ${data.nextBlockTime} segundos.`
-                    );
+                if (newRemaining <= 0) {
+                    setTimeLeft(300);
+                    setError('5 intentos fallidos! Bloqueado por 5 minutos. Contacta al admin.');
+                } else if (newRemaining === 1) {
+                    setError(`Ultimo intento! Si fallas, se bloqueara por 5 minutos.`);
                 } else {
                     setError(`Credenciales incorrectas. Te quedan ${newRemaining} intentos.`);
                 }
@@ -66,22 +76,21 @@ const Login = () => {
         setLoading(false);
     };
 
+    const resetAttempts = () => {
+        if (!isBlocked) {
+            setAttempts(0);
+            setRemaining(5);
+            setError('');
+        }
+    };
+
     return (
         <div className="login-wrapper">
-            {/* Fondo con partículas */}
-            <div className="particles">
-                {[...Array(50)].map((_, i) => (
-                    <span key={i} style={{ '--i': i }}></span>
-                ))}
-            </div>
-
-            {/* Contenedor principal */}
             <div className="login-container-modern">
-                {/* Lado izquierdo: Branding */}
                 <div className="login-brand">
                     <div className="brand-content">
                         <h1>D & R</h1>
-                        <p>Sistema de Inventario y Gestión de Ventas</p>
+                        <p>Sistema de Inventario y Gestion de Ventas con IA</p>
                         <div className="brand-decoration">
                             <div className="circle"></div>
                             <div className="circle"></div>
@@ -90,70 +99,77 @@ const Login = () => {
                     </div>
                 </div>
 
-                {/* Lado derecho: Formulario */}
                 <div className="login-form">
                     <div className="form-box">
-                        <h2>Iniciar Sesión</h2>
+                        <h2>Iniciar Sesion</h2>
                         <p className="subtitle">Accede a tu panel de control</p>
 
                         <form onSubmit={handleSubmit}>
                             <div className="input-group">
-                                <label>Usuario</label>
+                                <label htmlFor="email">Usuario</label>
                                 <input
-                                    type="text"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
+                                    id="email"
+                                    type="email"
+                                    placeholder="Ingrese su email"
+                                    value={email}
+                                    onChange={(e) => {
+                                        setEmail(e.target.value);
+                                        resetAttempts();
+                                    }}
                                     required
-                                    disabled={loading || timeLeft > 0}
+                                    disabled={loading || isBlocked}
+                                    autoComplete="email"
+                                    spellCheck="false"
                                 />
-                                <span className="input-icon">User</span>
                             </div>
 
                             <div className="input-group">
-                                <label>Contraseña</label>
+                                <label htmlFor="password">Contraseña</label>
                                 <input
+                                    id="password"
                                     type="password"
+                                    placeholder="Ingrese su contraseña"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
-                                    disabled={loading || timeLeft > 0}
+                                    disabled={loading || isBlocked}
+                                    autoComplete="current-password"
+                                    spellCheck="false"
                                 />
-                                <span className="input-icon">Lock</span>
                             </div>
 
-                            {/* Mensajes de error y bloqueo */}
                             {error && <div className="error-alert">{error}</div>}
 
-                            {timeLeft > 0 && (
+                            {isBlocked && (
                                 <div className="blocked-alert">
-                                    Espera <strong>{timeLeft}</strong> segundos para intentar de nuevo.
+                                    Espera <strong id="countdown">{Math.floor(timeLeft / 60)}:{timeLeft % 60 < 10 ? '0' : ''}{timeLeft % 60}</strong> segundos.
                                 </div>
                             )}
 
-                            {attempts > 0 && remaining > 0 && timeLeft === 0 && (
+                            {attempts > 0 && remaining > 0 && !isBlocked && (
                                 <div className="attempts-info">
-                                    Intentos fallidos: <strong>{attempts}</strong> / 5
+                                    Intentos restantes: <strong>{remaining}/5</strong>
                                 </div>
                             )}
 
                             <button
                                 type="submit"
-                                disabled={loading || timeLeft > 0}
-                                className="login-btn"
+                                disabled={loading || isBlocked}
+                                className={`login-btn ${isBlocked ? 'disabled' : ''}`}
                             >
                                 {loading ? (
                                     <>
                                         <span className="spinner"></span> Iniciando...
                                     </>
                                 ) : (
-                                    'Iniciar Sesión'
+                                    'Iniciar Sesion'
                                 )}
                             </button>
                         </form>
 
                         <div className="login-footer">
-                            <p><strong>Usuario:</strong> admin</p>
-                            <p><strong>Contraseña:</strong> admin123</p>
+                            <p><strong>Usuario:</strong> admin@dyr.com</p>
+                            <p><strong>Contraseña:</strong> Admin123!</p>
                         </div>
                     </div>
                 </div>
