@@ -2,15 +2,18 @@
 
 import { useEffect, useState } from "react"
 import { useAuth } from "../context/AuthContext"
+import { useTheme } from "../context/ThemeContext"
 import { inventoryService, salesService } from "../services/api"
 import { useNavigate } from "react-router-dom"
 import { FiMenu, FiChevronLeft } from "react-icons/fi"
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import Header from "../components/Header"
 import "./Dashboard.css"
 
 const Dashboard = () => {
     const { user } = useAuth()
     const navigate = useNavigate()
+    const { theme } = useTheme()
     const [stats, setStats] = useState({ totalProducts: 0, lowStock: 0, expiring: 0, totalSales: 0 })
     const [chartData, setChartData] = useState([])
     const [categoryData, setCategoryData] = useState([])
@@ -70,123 +73,129 @@ const Dashboard = () => {
     const COLORS = ["#6366f1", "#8b5cf6", "#d946ef", "#ec4899", "#f43f5e"]
 
     return (
-        <div className="dashboard-wrapper">
-            <aside className={`sidebar ${isCollapsed ? "closed" : "open"}`}>
-                <div className="sidebar-header">
-                    <div className="logo-container">
-                        <img src="/as.png" alt="Logo" className="logo-image" />
-                    </div>
-                    <button className="toggle-btn" onClick={toggleSidebar}>
-                        {isCollapsed ? <FiChevronLeft size={22} /> : <FiMenu size={22} />}
-                    </button>
-                </div>
-
-                <nav className="sidebar-nav">
-                    <button className="nav-item active">Inicio</button>
-                    <button onClick={() => navigate("/inventory")} className="nav-item">
-                        Inventario
-                    </button>
-                    <button onClick={() => navigate("/sales")} className="nav-item">
-                        Ventas
-                    </button>
-                    <button onClick={() => navigate("/predictions")} className="nav-item">
-                        Predicciones
-                    </button>
-                    <button onClick={() => navigate("/purchases")} className="nav-item">
-                        Lista de Compras
-                    </button>
-                </nav>
-
-                <div className="sidebar-footer">
-                    <select className="user-select">
-                        <option>Admin</option>
-                    </select>
-                </div>
-            </aside>
-
-            <div className={`content-area ${isCollapsed ? "collapsed" : ""}`}>
-                <header className="page-header">
-                    <div className="title-section">
-                        <h1>Bienvenido al Dashboard</h1>
-                        <p>Visión general del estado actual de tu inventario y ventas</p>
-                    </div>
-                </header>
-
-                <div className="stats-grid">
-                    <div className="stat-card card-green">
-                        <div className="card-header">
-                            <h3>Total de Productos</h3>
-                            <span className="card-icon">📦</span>
+        <>
+            <Header />
+            <div className="dashboard-wrapper">
+                <aside className={`sidebar ${isCollapsed ? "closed" : "open"}`}>
+                    <div className="sidebar-header">
+                        <div className="logo-container">
+                            <img src="/as.png" alt="Logo" className="logo-image" />
                         </div>
-                        <p className="stat-number">{stats.totalProducts}</p>
-                        <p className="stat-change positive">+12% vs mes anterior</p>
+                        <button className="toggle-btn" onClick={toggleSidebar}>
+                            {isCollapsed ? <FiChevronLeft size={22} /> : <FiMenu size={22} />}
+                        </button>
                     </div>
-                    <div className="stat-card card-yellow">
-                        <div className="card-header">
-                            <h3>Bajo Stock</h3>
-                            <span className="card-icon">⚠️</span>
-                        </div>
-                        <p className="stat-number">{stats.lowStock}</p>
-                        <p className="stat-change negative">-5% vs mes anterior</p>
-                    </div>
-                    <div className="stat-card card-red">
-                        <div className="card-header">
-                            <h3>Próximos a Vencer</h3>
-                            <span className="card-icon">⏰</span>
-                        </div>
-                        <p className="stat-number">{stats.expiring}</p>
-                        <p className="stat-change negative">+3% vs mes anterior</p>
-                    </div>
-                    <div className="stat-card card-blue">
-                        <div className="card-header">
-                            <h3>Ventas Totales</h3>
-                            <span className="card-icon">💰</span>
-                        </div>
-                        <p className="stat-number">${stats.totalSales}</p>
-                        <p className="stat-change positive">+18% vs mes anterior</p>
-                    </div>
-                </div>
 
-                <div className="charts-section">
-                    <div className="chart-container">
-                        <h3>Ventas Últimos 6 Meses</h3>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={chartData}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="mes" />
-                                <YAxis />
-                                <Tooltip />
-                                <Bar dataKey="ventas" fill="#6366f1" radius={[8, 8, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
+                    <nav className="sidebar-nav">
+                        <button className="nav-item active">Inicio</button>
+                        <button onClick={() => navigate("/inventory")} className="nav-item">
+                            Inventario
+                        </button>
+                        <button onClick={() => navigate("/sales")} className="nav-item">
+                            Ventas
+                        </button>
+                        <button onClick={() => navigate("/predictions")} className="nav-item">
+                            Predicciones
+                        </button>
+                        <button onClick={() => navigate("/purchases")} className="nav-item">
+                            Lista de Compras
+                        </button>
+                        <button onClick={() => navigate("/providers")} className="nav-item">
+                            Proveedores
+                        </button>
+                    </nav>
+
+                    <div className="sidebar-footer">
+                        <select className="user-select">
+                            <option>Admin</option>
+                        </select>
                     </div>
-                    <div className="chart-container">
-                        <h3>Distribución por Categoría</h3>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <PieChart>
-                                <Pie
-                                    data={categoryData}
-                                    cx="50%"
-                                    cy="50%"
-                                    labelLine={false}
-                                    label={({ name, value }) =>
-                                        `${name}: ${Math.round((value / categoryData.reduce((a, b) => a + b.value, 0)) * 100)}%`
-                                    }
-                                    outerRadius={80}
-                                    fill="#8884d8"
-                                    dataKey="value"
-                                >
-                                    {categoryData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip />
-                            </PieChart>
-                        </ResponsiveContainer>
+                </aside>
+
+                <div className={`content-area ${isCollapsed ? "collapsed" : ""}`}>
+                    <header className="page-header">
+                        <div className="title-section">
+                            <h1>Bienvenido al Dashboard</h1>
+                            <p>Visión general del estado actual de tu inventario y ventas</p>
+                        </div>
+                    </header>
+
+                    <div className="stats-grid">
+                        <div className="stat-card card-green">
+                            <div className="card-header">
+                                <h3>Total de Productos</h3>
+                                <span className="card-icon">📦</span>
+                            </div>
+                            <p className="stat-number">{stats.totalProducts}</p>
+                            <p className="stat-change positive">+12% vs mes anterior</p>
+                        </div>
+                        <div className="stat-card card-yellow">
+                            <div className="card-header">
+                                <h3>Bajo Stock</h3>
+                                <span className="card-icon">⚠️</span>
+                            </div>
+                            <p className="stat-number">{stats.lowStock}</p>
+                            <p className="stat-change negative">-5% vs mes anterior</p>
+                        </div>
+                        <div className="stat-card card-red">
+                            <div className="card-header">
+                                <h3>Próximos a Vencer</h3>
+                                <span className="card-icon">⏰</span>
+                            </div>
+                            <p className="stat-number">{stats.expiring}</p>
+                            <p className="stat-change negative">+3% vs mes anterior</p>
+                        </div>
+                        <div className="stat-card card-blue">
+                            <div className="card-header">
+                                <h3>Ventas Totales</h3>
+                                <span className="card-icon">💰</span>
+                            </div>
+                            <p className="stat-number">${stats.totalSales}</p>
+                            <p className="stat-change positive">+18% vs mes anterior</p>
+                        </div>
+                    </div>
+
+                    <div className="charts-section">
+                        <div className="chart-container">
+                            <h3>Ventas Últimos 6 Meses</h3>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={chartData}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="mes" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Bar dataKey="ventas" fill="#6366f1" radius={[8, 8, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                        <div className="chart-container">
+                            <h3>Distribución por Categoría</h3>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <PieChart>
+                                    <Pie
+                                        data={categoryData}
+                                        cx="50%"
+                                        cy="50%"
+                                        labelLine={false}
+                                        label={({ name, value }) =>
+                                            `${name}: ${Math.round((value / categoryData.reduce((a, b) => a + b.value, 0)) * 100)}%`
+                                        }
+                                        outerRadius={80}
+                                        fill="#8884d8"
+                                        dataKey="value"
+                                    >
+                                        {categoryData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     )
 }
 

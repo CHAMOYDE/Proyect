@@ -15,10 +15,12 @@ app.use(express.json())
 const authRoutes = require("./routes/auth-routes")
 const inventoryRoutes = require("./routes/inventory-routes")
 const salesRoutes = require("./routes/sales-routes")
+//const providersRoutes = require("./routes/providers-routes")
 
 app.use("/api/auth", authRoutes)
 app.use("/api/inventory", inventoryRoutes)
 app.use("/api/sales", salesRoutes)
+//app.use("/api/providers", providersRoutes)
 
 // Ruta de prueba
 app.get("/", (req, res) => {

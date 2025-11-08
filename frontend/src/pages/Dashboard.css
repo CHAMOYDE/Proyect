@@ -9,10 +9,10 @@
 }
 
 .stat-card {
-  background: white;
+  background: #1a1f3a;
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(0, 20, 60, 0.3);
   transition: transform 0.2s, box-shadow 0.2s;
   border-left: 5px solid;
   position: relative;
@@ -30,27 +30,27 @@
 
 .stat-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 200, 255, 0.2);
 }
 
 .stat-card.card-green {
-  border-left-color: #10b981;
-  background: #f0fdf4;
+  border-left-color: #00c8ff;
+  background: linear-gradient(135deg, #1a1f3a 0%, #0a2540 100%);
 }
 
 .stat-card.card-yellow {
-  border-left-color: #f59e0b;
-  background: #fffbeb;
+  border-left-color: #ffa500;
+  background: linear-gradient(135deg, #1a1f3a 0%, #2a1f0a 100%);
 }
 
 .stat-card.card-red {
-  border-left-color: #ef4444;
-  background: #fef2f2;
+  border-left-color: #ff4444;
+  background: linear-gradient(135deg, #1a1f3a 0%, #2a0a0a 100%);
 }
 
 .stat-card.card-blue {
-  border-left-color: #3b82f6;
-  background: #eff6ff;
+  border-left-color: #0096dc;
+  background: linear-gradient(135deg, #1a1f3a 0%, #0a1a40 100%);
 }
 
 .card-header {
@@ -61,7 +61,7 @@
 }
 
 .card-header h3 {
-  color: #666;
+  color: #b0b0b0;
   font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
@@ -77,23 +77,23 @@
   font-size: 32px;
   font-weight: 700;
   margin: 8px 0;
-  color: #1f2937;
+  color: #00c8ff;
 }
 
 .stat-card.card-green .stat-number {
-  color: #10b981;
+  color: #00c8ff;
 }
 
 .stat-card.card-yellow .stat-number {
-  color: #f59e0b;
+  color: #ffa500;
 }
 
 .stat-card.card-red .stat-number {
-  color: #ef4444;
+  color: #ff6666;
 }
 
 .stat-card.card-blue .stat-number {
-  color: #3b82f6;
+  color: #0096dc;
 }
 
 .stat-change {
@@ -122,14 +122,15 @@
 }
 
 .chart-container {
-  background: white;
+  background: #1a1f3a;
   padding: 32px;
   border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(0, 20, 60, 0.3);
+  border: 1px solid rgba(0, 200, 255, 0.1);
 }
 
 .chart-container h3 {
-  color: #1e3a8a;
+  color: #00c8ff;
   font-size: 18px;
   font-weight: 700;
   margin: 0 0 20px 0;
@@ -151,7 +152,8 @@
 .alert-box {
   padding: 20px;
   border-radius: 8px;
-  border-left: 4px solid #10b981;
+  border-left: 4px solid #00c8ff;
+  background: #1a1f3a;
 }
 
 .alert-box.alert {
@@ -173,7 +175,7 @@
   margin: 0 0 12px 0;
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: #ffffff;
 }
 
 .alert-box ul {
@@ -184,9 +186,9 @@
 
 .alert-box li {
   padding: 8px 0;
-  color: #4b5563;
+  color: #b0b0b0;
   font-size: 14px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(0, 200, 255, 0.1);
 }
 
 .alert-box li:last-child {
@@ -194,7 +196,7 @@
 }
 
 .alert-box li strong {
-  color: #1f2937;
+  color: #00c8ff;
   font-weight: 600;
 }
 
@@ -340,10 +342,10 @@
 }
 
 .page-header {
-  background-color: white;
+  background-color: #0a0e27;
   padding: 25px 30px;
-  border-bottom: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(0, 200, 255, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .page-title {
@@ -351,4 +353,48 @@
   font-size: 28px;
   font-weight: 700;
   color: #1f2937;
+}
+
+.page-header h1 {
+  color: #ffffff;
+}
+
+.page-header p {
+  color: #b0b0b0;
+}
+
+/* Recharts customization for dark mode */
+.recharts-text {
+  fill: #b0b0b0 !important;
+}
+
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: rgba(0, 200, 255, 0.1) !important;
+}
+
+.recharts-tooltip {
+  background: #1a1f3a !important;
+  border: 1px solid rgba(0, 200, 255, 0.2) !important;
+}
+
+.recharts-tooltip-wrapper {
+  outline: none;
+}
+/* Table styles */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #1a1f3a;
+}
+.metric-card {
+  padding: 20px;
+  background: #1a1f3a;
+  border-radius: 8px;
+  border-left: 4px solid #00c8ff;
+}
+.header {
+  padding: 20px;
+  background: #141829;
+  border-bottom: 1px solid rgba(0, 200, 255, 0.2);
 }

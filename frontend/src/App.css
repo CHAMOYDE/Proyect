@@ -366,17 +366,13 @@ body.dark-mode .recharts-cartesian-grid-vertical line {
 body.dark-mode .recharts-legend-item-text {
   color: #ffffff !important;
 }
-.app-container {
-  display: flex;
-  min-height: 100vh;
-}
-
+/* Updated to consistent dark theme */
 .main-content {
   margin-left: 250px;
   padding: 20px;
   transition: margin-left 0.3s ease;
   width: calc(100% - 250px);
-  background: #f5f5f5;
+  background: #0a0e27;
 }
 
 .main-content.expanded {
@@ -389,8 +385,19 @@ body.dark-mode .recharts-legend-item-text {
 }
 
 .content {
-  background: white;
+  background: #1a1f3a;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  color: #e0e0e0;
+}
+
+/* Dark mode recharts */
+.recharts-text {
+  fill: #b0b0b0 !important;
+}
+
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: rgba(0, 200, 255, 0.1) !important;
 }

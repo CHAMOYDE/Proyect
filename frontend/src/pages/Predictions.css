@@ -1,13 +1,14 @@
+/* Updated entire predictions page to dark tech theme matching Sales */
 /* Estilos de tabla */
 
 /* Contenedor de tabla mejorado */
 .table-container {
-  background: white;
+  background: #141829;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 15px rgba(0, 150, 220, 0.1);
   margin-bottom: 32px;
-  border: 1px solid #f0f0f0;
+  border: 1px solid #1f2942;
 }
 
 .data-table {
@@ -17,15 +18,19 @@
 
 /* Header de tabla mejorado */
 .data-table thead {
-  background: linear-gradient(180deg, #f5f7fa 0%, #eef2f7 100%);
-  border-bottom: 2px solid #ddd;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 150, 220, 0.2) 0%,
+    rgba(0, 200, 255, 0.1) 100%
+  );
+  border-bottom: 1px solid #1f2942;
 }
 
 .data-table th {
   padding: 16px;
   text-align: left;
   font-weight: 700;
-  color: #0066cc;
+  color: #00ffff;
   font-size: 13px;
   user-select: none;
   text-transform: uppercase;
@@ -38,19 +43,20 @@
 }
 
 .data-table th.sortable:hover {
-  background-color: #e8ecf4;
-  color: #0052a3;
+  background-color: rgba(0, 200, 255, 0.15);
+  color: #00ffff;
 }
 
 /* Filas con mejor espaciado */
 .data-table tbody tr {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #1f2942;
   transition: all 0.3s ease;
+  background-color: #141829;
 }
 
 .data-table tbody tr:hover {
-  background-color: #f8fafc;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  background-color: rgba(0, 150, 220, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 150, 220, 0.2);
 }
 
 .data-table tbody tr:last-child {
@@ -59,7 +65,7 @@
 
 .data-table td {
   padding: 16px;
-  color: #666;
+  color: #cbd5e0;
   font-size: 14px;
   line-height: 1.5;
 }
@@ -85,16 +91,24 @@
   border-radius: 6px;
 }
 
+.btn-edit {
+  color: #00c8ff;
+}
+
 .btn-edit:hover {
-  color: #0066cc;
+  color: #00ffff;
   transform: scale(1.15) rotate(5deg);
-  background-color: rgba(0, 102, 204, 0.1);
+  background-color: rgba(0, 200, 255, 0.2);
+}
+
+.btn-delete {
+  color: #f56565;
 }
 
 .btn-delete:hover {
-  color: #c62828;
+  color: #fc8181;
   transform: scale(1.15) rotate(-5deg);
-  background-color: rgba(198, 40, 40, 0.1);
+  background-color: rgba(245, 101, 101, 0.2);
 }
 
 .btn-edit:active,
@@ -105,7 +119,7 @@
 .table-loading {
   text-align: center;
   padding: 50px;
-  color: #999;
+  color: #718096;
   font-size: 14px;
 }
 
@@ -121,13 +135,13 @@
 .predictions-header h1 {
   margin: 0 0 8px 0;
   font-size: 28px;
-  color: #0066cc;
+  color: #00ffff;
   font-weight: 700;
 }
 
 .predictions-header p {
   margin: 0;
-  color: #6b7280;
+  color: #a0aec0;
   font-size: 14px;
 }
 
@@ -135,55 +149,88 @@
 .predictions-wrapper {
   display: flex;
   height: 100vh;
-  background-color: #f5f6fa;
+  background-color: #0a0e27;
 }
 
 .predictions-sidebar {
-  width: 260px;
-  background-color: #1e3a8a;
+  width: 280px;
+  background: linear-gradient(180deg, #141829 0%, #0f1419 100%);
   color: white;
   padding: 20px;
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 0 12px rgba(0, 150, 220, 0.1);
+  border-right: 1px solid #1f2942;
   overflow-y: auto;
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100%;
+  z-index: 1000;
 }
 
 .predictions-sidebar.closed {
-  width: 80px;
+  width: 70px;
 }
 
 .predictions-content {
   padding: 25px 30px;
   flex: 1;
   overflow: auto;
+  margin-left: 280px;
+  background-color: #0a0e27;
+}
+
+.predictions-content.collapsed {
+  margin-left: 70px;
 }
 
 .prediction-search {
-  background-color: white;
+  background-color: #141829;
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 150, 220, 0.1);
   margin-bottom: 25px;
+  border: 1px solid #1f2942;
+}
+
+.prediction-search h3 {
+  color: #00c8ff;
+  margin: 0 0 15px 0;
 }
 
 .search-form {
   display: flex;
   gap: 12px;
   margin-top: 15px;
+  flex-wrap: wrap;
 }
 
 .form-input {
   flex: 1;
+  min-width: 150px;
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #2d3748;
   border-radius: 6px;
   font-size: 14px;
+  background-color: #1a202c;
+  color: #e0e0e0;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #0096dc;
+  box-shadow: 0 0 0 3px rgba(0, 150, 220, 0.2);
+}
+
+.form-input::placeholder {
+  color: #718096;
 }
 
 .btn-primary {
-  background-color: #1e3a8a;
+  background: linear-gradient(135deg, #0096dc 0%, #00c8ff 100%);
   color: white;
   border: none;
   padding: 10px 20px;
@@ -192,25 +239,34 @@
   font-size: 14px;
   font-weight: 600;
   transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 150, 220, 0.2);
 }
 
 .btn-primary:hover {
-  background-color: #1e40af;
+  background: linear-gradient(135deg, #00c8ff 0%, #00ffff 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 150, 220, 0.3);
 }
 
 .prediction-result {
-  background-color: white;
+  background-color: #141829;
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 150, 220, 0.1);
   margin-top: 15px;
+  border: 1px solid #1f2942;
 }
 
 .prediction-card {
   padding: 20px;
   border-radius: 8px;
-  background-color: #f9fafb;
-  border-left: 5px solid #667eea;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 150, 220, 0.1) 0%,
+    rgba(0, 200, 255, 0.05) 100%
+  );
+  border-left: 5px solid #00c8ff;
+  border: 1px solid #1f2942;
 }
 
 .prediction-stats {
@@ -221,15 +277,15 @@
 }
 
 .stat {
-  background-color: white;
+  background-color: #1a202c;
   padding: 15px;
   border-radius: 6px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #2d3748;
 }
 
 .stat-label {
   font-size: 12px;
-  color: #6b7280;
+  color: #a0aec0;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -240,7 +296,7 @@
 .stat-value {
   font-size: 18px;
   font-weight: 700;
-  color: #1f2937;
+  color: #00ffff;
 }
 
 .alert-badge {
@@ -253,18 +309,18 @@
 }
 
 .alert-danger {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: rgba(245, 101, 101, 0.2);
+  color: #f56565;
 }
 
 .alert-warning {
-  background-color: #fef3c7;
-  color: #92400e;
+  background-color: rgba(251, 191, 36, 0.2);
+  color: #fcd34d;
 }
 
 .alert-success {
-  background-color: #dcfce7;
-  color: #166534;
+  background-color: rgba(52, 211, 153, 0.2);
+  color: #6ee7b7;
 }
 
 .charts-grid {
@@ -275,30 +331,32 @@
 }
 
 .chart-card {
-  background-color: white;
+  background-color: #141829;
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 150, 220, 0.1);
+  border: 1px solid #1f2942;
 }
 
 .chart-title {
   font-size: 16px;
   font-weight: 700;
-  color: #1f2937;
+  color: #00ffff;
   margin-bottom: 15px;
 }
 
 .predictions-table {
-  background-color: white;
+  background-color: #141829;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 150, 220, 0.1);
   overflow: hidden;
+  border: 1px solid #1f2942;
 }
 
 .table-title {
   font-size: 16px;
   font-weight: 700;
-  color: #1f2937;
+  color: #00ffff;
   padding: 20px 20px 0 20px;
   margin-bottom: 15px;
 }
@@ -309,8 +367,12 @@
 }
 
 .thead {
-  background-color: #667eea;
-  color: white;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 150, 220, 0.2) 0%,
+    rgba(0, 200, 255, 0.1) 100%
+  );
+  color: #00ffff;
 }
 
 .th {
@@ -320,13 +382,14 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  border-bottom: 1px solid #1f2942;
 }
 
 .td {
   padding: 14px 16px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #1f2942;
   font-size: 14px;
-  color: #4b5563;
+  color: #cbd5e0;
 }
 
 .badge {
@@ -339,44 +402,18 @@
 }
 
 .badge-alta {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: rgba(245, 101, 101, 0.2);
+  color: #f56565;
 }
 
 .badge-media {
-  background-color: #fef3c7;
-  color: #92400e;
+  background-color: rgba(251, 191, 36, 0.2);
+  color: #fcd34d;
 }
 
 .badge-baja {
-  background-color: #dcfce7;
-  color: #166534;
-}
-
-.predictions-content {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-}
-
-.prediction-card {
-  background: white;
-  border-radius: 8px;
-  padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.prediction-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-}
-
-.prediction-card h3 {
-  margin: 0 0 16px 0;
-  font-size: 18px;
-  color: #0066cc;
-  font-weight: 600;
+  background-color: rgba(52, 211, 153, 0.2);
+  color: #6ee7b7;
 }
 
 .metrics-grid {
@@ -386,6 +423,38 @@
   margin-bottom: 32px;
 }
 
+.metric-card {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 150, 220, 0.1) 0%,
+    rgba(0, 200, 255, 0.05) 100%
+  );
+  border: 1px solid #1f2942;
+  border-radius: 8px;
+  padding: 20px;
+  transition: all 0.2s ease;
+}
+
+.metric-card:hover {
+  border-color: #00c8ff;
+  box-shadow: 0 4px 12px rgba(0, 150, 220, 0.2);
+}
+
+.metric-card h3 {
+  margin: 0 0 8px 0;
+  color: #00c8ff;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-card p {
+  margin: 0;
+  color: #00ffff;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
 .inventory-header,
 .sales-header {
   display: flex;
@@ -393,6 +462,22 @@
   align-items: center;
   margin-bottom: 32px;
   gap: 20px;
+}
+
+.predictions-header-title {
+  color: #ffffff;
+}
+
+.predictions-header-title h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.predictions-header-title p {
+  margin: 5px 0 0;
+  color: #a0aec0;
 }
 
 @media (max-width: 768px) {
@@ -420,4 +505,29 @@
     margin: 0 4px;
     font-size: 16px;
   }
+
+  .predictions-content {
+    margin-left: 70px;
+  }
+
+  .predictions-sidebar {
+    width: 70px;
+  }
+}
+/* Table styles */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #1a1f3a;
+}
+.metric-card {
+  padding: 20px;
+  background: #1a1f3a;
+  border-radius: 8px;
+  border-left: 4px solid #00c8ff;
+}
+.header {
+  padding: 20px;
+  background: #141829;
+  border-bottom: 1px solid rgba(0, 200, 255, 0.2);
 }

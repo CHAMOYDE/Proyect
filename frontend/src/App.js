@@ -5,6 +5,7 @@ import ProtectedRoute from "./components/ProtectedRoute"
 import Login from "./pages/Login"
 import Dashboard from "./pages/Dashboard"
 import Inventory from "./pages/Inventory"
+import Providers from "./pages/Providers"
 import Sales from "./pages/Sales"
 import Predictions from "./pages/Predictions"
 import Purchases from "./pages/Purchases"
@@ -30,6 +31,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Inventory />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/providers"
+              element={
+                <ProtectedRoute>
+                  <Providers />
                 </ProtectedRoute>
               }
             />

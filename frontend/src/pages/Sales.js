@@ -2,14 +2,17 @@
 
 import { useEffect, useState } from "react"
 import { useAuth } from "../context/AuthContext"
+import { useTheme } from "../context/ThemeContext"
 import { salesService, inventoryService } from "../services/api"
 import { useNavigate } from "react-router-dom"
 import { jsPDF } from "jspdf"
 import { FiMenu, FiChevronLeft, FiDownload, FiChevronDown, FiChevronUp } from "react-icons/fi"
+import Header from "../components/Header"
 import "./Sales.css"
 
 const Sales = () => {
     const { user } = useAuth()
+    const { theme } = useTheme()
     const navigate = useNavigate()
 
     const [sales, setSales] = useState([])
@@ -115,143 +118,149 @@ const Sales = () => {
     }
 
     return (
-        <div className="dashboard-wrapper">
-            {/* SIDEBAR */}
-            <aside className={`sidebar ${isCollapsed ? "closed" : "open"}`}>
-                <div className="sidebar-header">
-                    <div className="logo-container">
-                        <img src="/as.png" alt="Logo" className="logo-image" />
+        <>
+            <Header />
+            <div className="dashboard-wrapper">
+                {/* SIDEBAR */}
+                <aside className={`sidebar ${isCollapsed ? "closed" : "open"} ${theme}`}>
+                    <div className="sidebar-header">
+                        <div className="logo-container">
+                            <img src="/as.png" alt="Logo" className="logo-image" />
+                        </div>
+                        <button className="toggle-btn" onClick={toggleSidebar}>
+                            {isCollapsed ? <FiChevronLeft size={22} /> : <FiMenu size={22} />}
+                        </button>
                     </div>
-                    <button className="toggle-btn" onClick={toggleSidebar}>
-                        {isCollapsed ? <FiChevronLeft size={22} /> : <FiMenu size={22} />}
-                    </button>
-                </div>
 
-                <nav className="sidebar-nav">
-                    <button onClick={() => navigate("/dashboard")} className="nav-item">
-                        Inicio
-                    </button>
-                    <button onClick={() => navigate("/inventory")} className="nav-item">
-                        Inventario
-                    </button>
-                    <button className="nav-item active">Ventas</button>
-                    <button onClick={() => navigate("/predictions")} className="nav-item">
-                        Predicciones
-                    </button>
-                    <button onClick={() => navigate("/purchases")} className="nav-item">
-                        Lista de Compras
-                    </button>
-                </nav>
+                    <nav className="sidebar-nav">
+                        <button onClick={() => navigate("/dashboard")} className="nav-item">
+                            Inicio
+                        </button>
+                        <button onClick={() => navigate("/inventory")} className="nav-item">
+                            Inventario
+                        </button>
+                        <button className="nav-item active">Ventas</button>
+                        <button onClick={() => navigate("/predictions")} className="nav-item">
+                            Predicciones
+                        </button>
+                        <button onClick={() => navigate("/purchases")} className="nav-item">
+                            Lista de Compras
+                        </button>
+                        <button onClick={() => navigate("/providers")} className="nav-item">
+                            Proveedores
+                        </button>
+                    </nav>
 
-                <div className="sidebar-footer">
-                    <select className="user-select">
-                        <option>Admin</option>
-                    </select>
-                </div>
-            </aside>
-
-            {/* CONTENIDO */}
-            <div className={`content-area ${isCollapsed ? "collapsed" : ""}`}>
-                <header className="page-header">
-                    <div className="title-section">
-                        <h1>Gestión de Ventas</h1>
-                        <p>Últimas ventas registradas</p>
+                    <div className="sidebar-footer">
+                        <select className="user-select">
+                            <option>Admin</option>
+                        </select>
                     </div>
-                    <button onClick={openModal} className="btn-new-sale">
-                        + Nueva Venta
-                    </button>
-                </header>
+                </aside>
 
-                {/* BOTONES ACCIÓN */}
-                <div className="action-buttons">
-                    <button onClick={handleDownloadPDF} className="btn-pdf">
-                        <FiDownload size={16} /> Descargar PDF
-                    </button>
-                    <button onClick={toggleHistory} className="btn-history">
-                        {showHistory ? <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
-                        Ver Historial
-                    </button>
-                </div>
+                {/* CONTENIDO */}
+                <div className={`content-area ${isCollapsed ? "collapsed" : ""}`}>
+                    <header className="page-header">
+                        <div className="title-section">
+                            <h1>Gestión de Ventas</h1>
+                            <p>Últimas ventas registradas</p>
+                        </div>
+                        <button onClick={openModal} className="btn-new-sale">
+                            + Nueva Venta
+                        </button>
+                    </header>
 
-                {/* DESPLEGABLE DE ÚLTIMAS 5 VENTAS */}
-                <div className={`history-dropdown ${showHistory ? "open" : ""}`}>
-                    <div className="history-header">
-                        <h3>Últimas 5 Ventas</h3>
+                    {/* BOTONES ACCIÓN */}
+                    <div className="action-buttons">
+                        <button onClick={handleDownloadPDF} className="btn-pdf">
+                            <FiDownload size={16} /> Descargar PDF
+                        </button>
+                        <button onClick={toggleHistory} className="btn-history">
+                            {showHistory ? <FiChevronUp size={16} /> : <FiChevronDown size={16} />}
+                            Ver Historial
+                        </button>
                     </div>
-                    <div className="history-list">
-                        {last5Sales.length === 0 ? (
-                            <p className="no-sales">No hay ventas registradas</p>
-                        ) : (
-                            last5Sales.map((sale) => (
-                                <div key={sale.id} className="history-item">
-                                    <div>
-                                        <strong>{getProductName(sale.productId)}</strong>
-                                        <span className="quantity">x{sale.quantity}</span>
+
+                    {/* DESPLEGABLE DE ÚLTIMAS 5 VENTAS */}
+                    <div className={`history-dropdown ${showHistory ? "open" : ""}`}>
+                        <div className="history-header">
+                            <h3>Últimas 5 Ventas</h3>
+                        </div>
+                        <div className="history-list">
+                            {last5Sales.length === 0 ? (
+                                <p className="no-sales">No hay ventas registradas</p>
+                            ) : (
+                                last5Sales.map((sale) => (
+                                    <div key={sale.id} className="history-item">
+                                        <div>
+                                            <strong>{getProductName(sale.productId)}</strong>
+                                            <span className="quantity">x{sale.quantity}</span>
+                                        </div>
+                                        <div>
+                                            <span className="date">{sale.date}</span>
+                                            <span className="total">S/ {sale.totalPrice}</span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span className="date">{sale.date}</span>
-                                        <span className="total">S/ {sale.totalPrice}</span>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </div>
-
-                {/* TABLA PRINCIPAL (opcional, puedes ocultar si solo quieres el desplegable) */}
-                {/* <div className="sales-table-container"> ... </div> */}
-            </div>
-
-            {/* MODAL NUEVA VENTA */}
-            {showModal && (
-                <div className="modal-overlay" onClick={closeModal}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h3>Registrar Nueva Venta</h3>
-                        <form onSubmit={handleSubmit}>
-                            <div className="form-group">
-                                <label>Producto</label>
-                                <select name="productId" value={formData.productId} onChange={handleInputChange} required>
-                                    <option value="">Selecciona un producto</option>
-                                    {products.map((p) => (
-                                        <option key={p.id} value={p.id}>
-                                            {p.name} - Stock: {p.stock} - S/ {p.price}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label>Cantidad</label>
-                                <input
-                                    type="number"
-                                    name="quantity"
-                                    value={formData.quantity}
-                                    onChange={handleInputChange}
-                                    min="1"
-                                    required
-                                />
-                            </div>
-                            {formData.productId && formData.quantity && (
-                                <div className="sale-summary">
-                                    <p>
-                                        <strong>Total:</strong> S/{" "}
-                                        {(products.find((p) => p.id === Number.parseInt(formData.productId))?.price || 0) *
-                                            formData.quantity}
-                                    </p>
-                                </div>
+                                ))
                             )}
-                            <div className="modal-actions">
-                                <button type="button" onClick={closeModal} className="btn-cancel">
-                                    Cancelar
-                                </button>
-                                <button type="submit" className="btn-submit">
-                                    Registrar Venta
-                                </button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
+
+                    {/* TABLA PRINCIPAL (opcional, puedes ocultar si solo quieres el desplegable) */}
+                    {/* <div className="sales-table-container"> ... </div> */}
                 </div>
-            )}
-        </div>
+
+                {/* MODAL NUEVA VENTA */}
+                {showModal && (
+                    <div className="modal-overlay" onClick={closeModal}>
+                        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                            <h3>Registrar Nueva Venta</h3>
+                            <form onSubmit={handleSubmit}>
+                                <div className="form-group">
+                                    <label>Producto</label>
+                                    <select name="productId" value={formData.productId} onChange={handleInputChange} required>
+                                        <option value="">Selecciona un producto</option>
+                                        {products.map((p) => (
+                                            <option key={p.id} value={p.id}>
+                                                {p.name} - Stock: {p.stock} - S/ {p.price}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>Cantidad</label>
+                                    <input
+                                        type="number"
+                                        name="quantity"
+                                        value={formData.quantity}
+                                        onChange={handleInputChange}
+                                        min="1"
+                                        required
+                                    />
+                                </div>
+                                {formData.productId && formData.quantity && (
+                                    <div className="sale-summary">
+                                        <p>
+                                            <strong>Total:</strong> S/{" "}
+                                            {(products.find((p) => p.id === Number.parseInt(formData.productId))?.price || 0) *
+                                                formData.quantity}
+                                        </p>
+                                    </div>
+                                )}
+                                <div className="modal-actions">
+                                    <button type="button" onClick={closeModal} className="btn-cancel">
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" className="btn-submit">
+                                        Registrar Venta
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </>
     )
 }
 

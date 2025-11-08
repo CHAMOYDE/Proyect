@@ -1,7 +1,7 @@
 "use client"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
-import "../styles/Sidebar.css"
+import "../components/Sidebar.css"
 
 const Sidebar = ({ isCollapsed, toggleSidebar }) => {
     const navigate = useNavigate()
@@ -11,6 +11,7 @@ const Sidebar = ({ isCollapsed, toggleSidebar }) => {
     const menuItems = [
         { path: "/dashboard", label: "Dashboard", icon: "fa-home" },
         { path: "/inventory", label: "Inventario", icon: "fa-boxes" },
+        { path: "/providers", label: "Proveedores", icon: "fa-truck" },
         { path: "/sales", label: "Ventas", icon: "fa-shopping-cart" },
         { path: "/predictions", label: "Predicciones", icon: "fa-chart-line" },
         { path: "/purchases", label: "Lista de Compras", icon: "fa-list" },
@@ -19,7 +20,7 @@ const Sidebar = ({ isCollapsed, toggleSidebar }) => {
     return (
         <div className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
             <div className="sidebar-header">
-                <h2 className="logo">D&R</h2>
+                <img src="/as.png" alt="D&R Logo" className="logo-image" />
                 <button onClick={toggleSidebar} className="toggle-btn">
                     {isCollapsed ? "→" : "←"}
                 </button>

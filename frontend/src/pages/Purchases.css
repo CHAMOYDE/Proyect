@@ -320,3 +320,20 @@ tfoot tr:hover {
     grid-template-columns: 1fr;
   }
 }
+/* Table styles */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #1a1f3a;
+}
+.metric-card {
+  padding: 20px;
+  background: #1a1f3a;
+  border-radius: 8px;
+  border-left: 4px solid #00c8ff;
+}
+.header {
+  padding: 20px;
+  background: #141829;
+  border-bottom: 1px solid rgba(0, 200, 255, 0.2);
+}

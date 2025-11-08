@@ -2,13 +2,16 @@
 
 import { useEffect, useState } from "react"
 import { useAuth } from "../context/AuthContext"
+import { useTheme } from "../context/ThemeContext"
 import { inventoryService } from "../services/api"
 import { useNavigate } from "react-router-dom"
 import { FiMenu, FiChevronLeft, FiSearch, FiFilter, FiEdit, FiTrash2, FiPackage } from "react-icons/fi"
+import Header from "../components/Header"
 import "./Inventory.css"
 
 const Inventory = () => {
     const { user } = useAuth()
+    const { theme } = useTheme()
     const navigate = useNavigate()
     const [products, setProducts] = useState([])
     const [filteredProducts, setFilteredProducts] = useState([])
@@ -105,116 +108,124 @@ const Inventory = () => {
     }
 
     return (
-        <div className="dashboard-wrapper">
-            {/* SIDEBAR */}
-            <aside className={`sidebar ${isCollapsed ? "closed" : "open"}`}>
-                <div className="sidebar-header">
-                    <div className="logo-container">
-                        <img src="/as.png" alt="Logo" className="logo-image" />
+        <>
+            <Header />
+            <div className="dashboard-wrapper">
+                {/* SIDEBAR */}
+                <aside className={`sidebar ${isCollapsed ? "closed" : "open"}`}>
+                    <div className="sidebar-header">
+                        <div className="logo-container">
+                            <img src="/as.png" alt="Logo" className="logo-image" />
+                        </div>
+                        <button className="toggle-btn" onClick={toggleSidebar}>
+                            {isCollapsed ? <FiChevronLeft size={22} /> : <FiMenu size={22} />}
+                        </button>
                     </div>
-                    <button className="toggle-btn" onClick={toggleSidebar}>
-                        {isCollapsed ? <FiChevronLeft size={22} /> : <FiMenu size={22} />}
-                    </button>
-                </div>
 
-                <nav className="sidebar-nav">
-                    <button onClick={() => navigate("/dashboard")} className="nav-item">
-                        Inicio
-                    </button>
-                    <button className="nav-item active">Inventario</button>
-                    <button onClick={() => navigate("/sales")} className="nav-item">
-                        Ventas
-                    </button>
-                    <button onClick={() => navigate("/predictions")} className="nav-item">
-                        Predicciones
-                    </button>
-                    <button onClick={() => navigate("/purchases")} className="nav-item">Lista de Compras</button>
-                </nav>
+                    <nav className="sidebar-nav">
+                        <button onClick={() => navigate("/dashboard")} className="nav-item">
+                            Inicio
+                        </button>
+                        <button className="nav-item active">Inventario</button>
+                        <button onClick={() => navigate("/sales")} className="nav-item">
+                            Ventas
+                        </button>
+                        <button onClick={() => navigate("/predictions")} className="nav-item">
+                            Predicciones
+                        </button>
+                        <button onClick={() => navigate("/purchases")} className="nav-item">
+                            Lista de Compras
+                        </button>
+                        <button onClick={() => navigate("/providers")} className="nav-item">
+                            Proveedores
+                        </button>
+                    </nav>
 
-                <div className="sidebar-footer">
-                    <select className="user-select">
-                        <option>Admin</option>
-                    </select>
-                </div>
-            </aside>
-
-            {/* CONTENIDO */}
-            <div className={`content-area ${isCollapsed ? "collapsed" : ""}`}>
-                <header className="page-header">
-                    <div className="title-section">
-                        <h1>Gestión de Inventario</h1>
-                        <p>Total de productos: {products.length}</p>
+                    <div className="sidebar-footer">
+                        <select className="user-select">
+                            <option>Admin</option>
+                        </select>
                     </div>
-                    <button onClick={() => openModal()} className="btn-new-product">
-                        + Crear Producto
-                    </button>
-                </header>
+                </aside>
 
-                {/* BARRA DE BÚSQUEDA */}
-                <div className="search-bar">
-                    <div className="search-input-wrapper">
-                        <FiSearch className="search-icon" />
-                        <input
-                            type="text"
-                            placeholder="Buscar por nombre o SKU..."
-                            value={searchTerm}
-                            onChange={handleSearch}
-                            className="search-input"
-                        />
+                {/* CONTENIDO */}
+                <div className={`content-area ${isCollapsed ? "collapsed" : ""}`}>
+                    <header className="page-header">
+                        <div className="title-section">
+                            <h1>Gestión de Inventario</h1>
+                            <p>Total de productos: {products.length}</p>
+                        </div>
+                        <button onClick={() => openModal()} className="btn-new-product">
+                            + Crear Producto
+                        </button>
+                    </header>
+
+                    {/* BARRA DE BÚSQUEDA */}
+                    <div className="search-bar">
+                        <div className="search-input-wrapper">
+                            <FiSearch className="search-icon" />
+                            <input
+                                type="text"
+                                placeholder="Buscar por nombre o SKU..."
+                                value={searchTerm}
+                                onChange={handleSearch}
+                                className="search-input"
+                            />
+                        </div>
+                        <button className="btn-filter">
+                            <FiFilter size={18} /> Filtrar
+                        </button>
                     </div>
-                    <button className="btn-filter">
-                        <FiFilter size={18} /> Filtrar
-                    </button>
-                </div>
 
-                {/* TABLA */}
-                <div className="table-container">
-                    <table className="inventory-table">
-                        <thead>
-                            <tr>
-                                <th>SKU</th>
-                                <th>Nombre</th>
-                                <th>Categoría</th>
-                                <th>Stock Actual</th>
-                                <th>Mínimo</th>
-                                <th>Precio</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredProducts.length === 0 ? (
+                    {/* TABLA */}
+                    <div className="table-container">
+                        <table className="inventory-table">
+                            <thead>
                                 <tr>
-                                    <td colSpan="7" className="no-data">
-                                        No se encontraron productos
-                                    </td>
+                                    <th>SKU</th>
+                                    <th>Nombre</th>
+                                    <th>Categoría</th>
+                                    <th>Stock Actual</th>
+                                    <th>Mínimo</th>
+                                    <th>Precio</th>
+                                    <th>Acciones</th>
                                 </tr>
-                            ) : (
-                                filteredProducts.map((p) => (
-                                    <tr key={p.id}>
-                                        <td className="sku">{p.sku}</td>
-                                        <td className="product-name">{p.name}</td>
-                                        <td>{p.category || "Alimentos"}</td>
-                                        <td>
-                                            <span className={`stock-badge ${getStockColor(p.stock, p.minStock)}`}>{p.stock}</span>
-                                        </td>
-                                        <td>{p.minStock}</td>
-                                        <td>S/ {Number.parseFloat(p.price).toFixed(2)}</td>
-                                        <td className="actions">
-                                            <button onClick={() => openModal(p)} className="btn-edit" title="Editar">
-                                                <FiEdit size={16} />
-                                            </button>
-                                            <button onClick={() => handleDelete(p.id)} className="btn-delete" title="Eliminar">
-                                                <FiTrash2 size={16} />
-                                            </button>
-                                            <button className="btn-stock" title="Ajustar Stock">
-                                                <FiPackage size={16} />
-                                            </button>
+                            </thead>
+                            <tbody>
+                                {filteredProducts.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="7" className="no-data">
+                                            No se encontraron productos
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                ) : (
+                                    filteredProducts.map((p) => (
+                                        <tr key={p.id}>
+                                            <td className="sku">{p.sku}</td>
+                                            <td className="product-name">{p.name}</td>
+                                            <td>{p.category || "Alimentos"}</td>
+                                            <td>
+                                                <span className={`stock-badge ${getStockColor(p.stock, p.minStock)}`}>{p.stock}</span>
+                                            </td>
+                                            <td>{p.minStock}</td>
+                                            <td>S/ {Number.parseFloat(p.price).toFixed(2)}</td>
+                                            <td className="actions">
+                                                <button onClick={() => openModal(p)} className="btn-edit" title="Editar">
+                                                    <FiEdit size={16} />
+                                                </button>
+                                                <button onClick={() => handleDelete(p.id)} className="btn-delete" title="Eliminar">
+                                                    <FiTrash2 size={16} />
+                                                </button>
+                                                <button className="btn-stock" title="Ajustar Stock">
+                                                    <FiPackage size={16} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -250,9 +261,12 @@ const Inventory = () => {
                                         value={formData.category}
                                         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                     >
-                                        <option>Alimentos</option>
-                                        <option>Bebidas</option>
-                                        <option>Limpieza</option>
+                                        <option>Teclados</option>
+                                        <option>Laptods</option>
+                                        <option>Mouses</option>
+                                        <option>Procesadores</option>
+                                        <option>Monitores</option>
+                                        <option>Cases</option>
                                         <option>Otros</option>
                                     </select>
                                 </div>
@@ -300,7 +314,7 @@ const Inventory = () => {
                     </div>
                 </div>
             )}
-        </div>
+        </>
     )
 }
 
