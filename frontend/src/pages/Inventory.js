@@ -58,14 +58,14 @@ const Inventory = () => {
             setFormData({
                 sku: product.sku,
                 name: product.name,
-                category: product.category || "Alimentos",
+                category: product.category || "Productos",
                 stock: product.stock,
                 minStock: product.minStock,
                 price: product.price,
             })
         } else {
             setEditingProduct(null)
-            setFormData({ sku: "", name: "", category: "Alimentos", stock: "", minStock: "", price: "" })
+            setFormData({ sku: "", name: "", category: "Productos", stock: "", minStock: "", price: "" })
         }
         setShowModal(true)
     }
@@ -140,12 +140,6 @@ const Inventory = () => {
                             Proveedores
                         </button>
                     </nav>
-
-                    <div className="sidebar-footer">
-                        <select className="user-select">
-                            <option>Admin</option>
-                        </select>
-                    </div>
                 </aside>
 
                 {/* CONTENIDO */}

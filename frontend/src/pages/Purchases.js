@@ -99,12 +99,6 @@ const Purchases = () => {
                             Proveedores
                         </button>
                     </nav>
-
-                    <div className="sidebar-footer">
-                        <select className="user-select">
-                            <option>Admin</option>
-                        </select>
-                    </div>
                 </aside>
 
                 <div className={`content-area ${isCollapsed ? "collapsed" : ""}`}>
@@ -176,7 +170,7 @@ const Purchases = () => {
                                         name="item"
                                         value={formData.item}
                                         onChange={handleInputChange}
-                                        placeholder="Ej: Arroz 5kg"
+                                        placeholder="Ej: Teclado Mecánico"
                                         required
                                     />
                                 </div>
@@ -199,7 +193,7 @@ const Purchases = () => {
                                         name="estimatedCost"
                                         value={formData.estimatedCost}
                                         onChange={handleInputChange}
-                                        placeholder="Ej: 150.50"
+                                        placeholder="Ej: 200.50"
                                         step="0.01"
                                         required
                                     />

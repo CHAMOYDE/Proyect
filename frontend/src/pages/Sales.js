@@ -150,12 +150,6 @@ const Sales = () => {
                             Proveedores
                         </button>
                     </nav>
-
-                    <div className="sidebar-footer">
-                        <select className="user-select">
-                            <option>Admin</option>
-                        </select>
-                    </div>
                 </aside>
 
                 {/* CONTENIDO */}

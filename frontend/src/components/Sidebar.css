@@ -20,25 +20,26 @@
 }
 
 .sidebar-header {
-  padding: 20px 15px;
+  padding: 25px 15px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid rgba(0, 200, 255, 0.2);
 }
 
-/* Added logo-image styling with responsive sizing */
+/* Increased logo size from 70px to 100px and enhanced filters to remove blue background */
 .logo-image {
-  height: 50px;
+  height: 100px;
   width: auto;
   max-width: 100%;
   object-fit: contain;
   transition: all 0.3s ease;
   flex-shrink: 0;
+  /* Removed complex filters since logo is now transparent */
 }
 
 .sidebar.collapsed .logo-image {
-  height: 40px;
+  height: 60px;
   padding: 5px;
 }
 
@@ -72,8 +73,6 @@
 
 .nav-btn.active {
   background: rgba(0, 200, 255, 0.2);
-  border-left: 4px solid #00c8ff;
-  color: #00c8ff;
 }
 
 .nav-btn i {

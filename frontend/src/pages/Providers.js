@@ -172,12 +172,6 @@ const Providers = () => {
                         </button>
                         <button className="nav-item active">Proveedores</button>
                     </nav>
-
-                    <div className="sidebar-footer">
-                        <select className="user-select">
-                            <option>Admin</option>
-                        </select>
-                    </div>
                 </aside>
 
                 {/* CONTENIDO */}
