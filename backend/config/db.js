@@ -1,6 +1,5 @@
-// Configuración de conexión a Azure SQL
-const sql = require("mssql")
-require("dotenv").config()
+// config/db.js
+const sql = require("mssql");
 
 const config = {
   user: process.env.DB_USER,
@@ -16,14 +15,26 @@ const config = {
     min: 0,
     idleTimeoutMillis: 30000,
   },
-}
+};
 
-// Crear y conectar el pool
-const pool = new sql.ConnectionPool(config)
+let pool;
 
-pool
-  .connect()
-  .then(() => console.log("[DB] Conectado a Azure SQL"))
-  .catch((err) => console.error("[DB] Error de conexión:", err.message))
+const connectDB = async () => {
+  if (!pool) {
+    try {
+      pool = await sql.connect(config);
+      console.log("Conectado correctamente a Azure SQL");
+    } catch (err) {
+      console.error("Error conexión:", err);
+      throw err;
+    }
+  }
+  return pool;
+};
 
-module.exports = pool
+const getPool = () => {
+  if (!pool) throw new Error("No hay conexión activa a la base de datos");
+  return pool;
+};
+
+module.exports = { sql, connectDB, getPool };

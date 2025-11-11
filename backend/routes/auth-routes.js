@@ -1,11 +1,12 @@
-// RUTAS DE AUTENTICACIÓN
-// Solo login, el resto se maneja en otros controladores
+const express = require("express");
+const router = express.Router();
+const { authMiddleware, checkRole } = require("../middleware/auth");
+const { login, getCurrentUser } = require("../controllers/auth-controller");
 
-const express = require("express")
-const router = express.Router()
-const { login } = require("../controllers/auth-controller")
+router.post("/login", login);
+router.get("/current", authMiddleware, getCurrentUser);
+router.get("/admin-data", authMiddleware, checkRole("administrador"), (req, res) => {
+  res.json({ message: "Solo admin puede ver esto" });
+});
 
-// POST /api/auth/login - Iniciar sesión
-router.post("/login", login)
-
-module.exports = router
+module.exports = router;

@@ -1,16 +1,17 @@
-// RUTAS DE VENTAS
+const express = require("express");
+const router = express.Router();
+const { authMiddleware, checkRole } = require("../middleware/auth");
+const salesController = require("../controllers/sales-controller");
 
-const express = require("express")
-const router = express.Router()
-const { authMiddleware, checkRole } = require("../middleware/auth")
-const { getSales, createSale } = require("../controllers/sales-controller")
+// Rutas de ventas
 
-router.use(authMiddleware)
+// Solo admin puede ver todas las ventas
+router.get("/", authMiddleware, checkRole("administrador"), salesController.getSales);
 
-// Lectura - Todos autenticados
-router.get("/", getSales)
+// Solo admin puede ver venta por ID
+router.get("/:id", authMiddleware, checkRole("administrador"), salesController.getSaleById);
 
-// Crear venta - Empleado o admin
-router.post("/", checkRole("administrador", "empleado"), createSale)
+// Admin y empleado pueden crear ventas
+router.post("/", authMiddleware, salesController.createSale);
 
-module.exports = router
+module.exports = router;

@@ -1,9 +1,10 @@
 "use client"
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import { useAuth } from "../context/AuthContext"
 import Header from "../components/Header"
-import { FiEdit, FiTrash2, FiPlus, FiMenu, FiChevronLeft } from "react-icons/fi"
-import "./Sales.css"
+import { FiEdit, FiTrash2, FiPlus, FiMenu, FiChevronLeft, FiPackage, FiPhone, FiMail, FiUser } from "react-icons/fi"
+import "./Providers.css"
 
 const Providers = () => {
     const [providers, setProviders] = useState([])
@@ -13,8 +14,9 @@ const Providers = () => {
     const [isCollapsed, setIsCollapsed] = useState(false)
     const [showModal, setShowModal] = useState(false)
     const [editingProvider, setEditingProvider] = useState(null)
-    const [formData, setFormData] = useState({ nombre: "", contacto: "", telefono: "", email: "" })
+    const [formData, setFormData] = useState({ nombre: "", contacto: "", telefono: "", correo: "" })
     const navigate = useNavigate()
+    const { user } = useAuth()
 
     useEffect(() => {
         fetchProviders()
@@ -29,7 +31,7 @@ const Providers = () => {
             })
             const data = await response.json()
             if (data.success) {
-                setProviders(data.data)
+                setProviders(data.providers)
             }
         } catch (error) {
             console.error("Error obteniendo proveedores:", error)
@@ -42,12 +44,13 @@ const Providers = () => {
         try {
             setLoading(true)
             const token = localStorage.getItem("token")
-            const response = await fetch(`http://localhost:5000/api/providers/${encodeURIComponent(providerName)}/products`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
+            const response = await fetch(
+                `http://localhost:5000/api/providers/${encodeURIComponent(providerName)}/products`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            )
             const data = await response.json()
             if (data.success) {
-                setProducts(data.data)
+                setProducts(data.products)
                 setSelectedProvider(providerName)
             }
         } catch (error) {
@@ -64,11 +67,11 @@ const Providers = () => {
                 nombre: provider.nombre,
                 contacto: provider.contacto || "",
                 telefono: provider.telefono || "",
-                email: provider.email || "",
+                correo: provider.correo || "",
             })
         } else {
             setEditingProvider(null)
-            setFormData({ nombre: "", contacto: "", telefono: "", email: "" })
+            setFormData({ nombre: "", contacto: "", telefono: "", correo: "" })
         }
         setShowModal(true)
     }
@@ -85,14 +88,17 @@ const Providers = () => {
             let response
 
             if (editingProvider) {
-                response = await fetch(`http://localhost:5000/api/providers/${encodeURIComponent(editingProvider.nombre)}`, {
-                    method: "PUT",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(formData),
-                })
+                response = await fetch(
+                    `http://localhost:5000/api/providers/${encodeURIComponent(editingProvider.nombre)}`,
+                    {
+                        method: "PUT",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(formData),
+                    }
+                )
             } else {
                 response = await fetch("http://localhost:5000/api/providers", {
                     method: "POST",
@@ -120,10 +126,13 @@ const Providers = () => {
         if (window.confirm(`¿Eliminar el proveedor "${nombre}"?`)) {
             try {
                 const token = localStorage.getItem("token")
-                const response = await fetch(`http://localhost:5000/api/providers/${encodeURIComponent(nombre)}`, {
-                    method: "DELETE",
-                    headers: { Authorization: `Bearer ${token}` },
-                })
+                const response = await fetch(
+                    `http://localhost:5000/api/providers/${encodeURIComponent(nombre)}`,
+                    {
+                        method: "DELETE",
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
+                )
 
                 const data = await response.json()
                 if (data.success) {
@@ -143,7 +152,6 @@ const Providers = () => {
         <>
             <Header />
             <div className="dashboard-wrapper">
-                {/* SIDEBAR */}
                 <aside className={`sidebar ${isCollapsed ? "closed" : "open"}`}>
                     <div className="sidebar-header">
                         <div className="logo-container">
@@ -167,76 +175,103 @@ const Providers = () => {
                         <button onClick={() => navigate("/predictions")} className="nav-item">
                             Predicciones
                         </button>
-                        <button onClick={() => navigate("/purchases")} className="nav-item">
-                            Lista de Compras
-                        </button>
                         <button className="nav-item active">Proveedores</button>
                     </nav>
                 </aside>
 
-                {/* CONTENIDO */}
                 <div className={`content-area ${isCollapsed ? "collapsed" : ""}`}>
                     {!selectedProvider ? (
                         <>
                             <header className="page-header">
                                 <div className="title-section">
                                     <h1>Gestión de Proveedores</h1>
-                                    <p>Administra los proveedores de tu empresa</p>
+                                    <p>Administra los proveedores y sus productos</p>
                                 </div>
-                                <button onClick={() => openModal()} className="btn-new-sale">
+                                <button onClick={() => openModal()} className="btn-new-provider">
                                     <FiPlus size={18} /> Nuevo Proveedor
                                 </button>
                             </header>
 
                             {loading ? (
-                                <div className="loading">Cargando proveedores...</div>
+                                <div className="loading-state">Cargando proveedores...</div>
                             ) : providers.length > 0 ? (
-                                <div className="providers-table">
-                                    <table className="table-styled">
-                                        <thead>
-                                            <tr>
-                                                <th>Proveedor</th>
-                                                <th>Productos</th>
-                                                <th>Acciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {providers.map((provider) => (
-                                                <tr key={provider.nombre}>
-                                                    <td
-                                                        className="provider-name-cell"
-                                                        onClick={() => fetchProductsByProvider(provider.nombre)}
-                                                        style={{ cursor: "pointer", color: "#00c8ff", fontWeight: "500" }}
-                                                    >
-                                                        {provider.nombre}
-                                                    </td>
-                                                    <td>{provider.total_productos}</td>
-                                                    <td className="actions-cell">
-                                                        <button className="btn-edit-small" onClick={() => openModal(provider)} title="Editar">
-                                                            <FiEdit size={16} />
-                                                        </button>
-                                                        <button
-                                                            className="btn-delete-small"
-                                                            onClick={() => handleDelete(provider.nombre)}
-                                                            title="Eliminar"
-                                                        >
-                                                            <FiTrash2 size={16} />
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                <div className="providers-grid">
+                                    {providers.map((provider) => (
+                                        <div key={provider.id} className="provider-card">
+                                            <div className="provider-header">
+                                                <div className="provider-icon">
+                                                    <FiPackage size={28} />
+                                                </div>
+                                                <h3>{provider.nombre}</h3>
+                                            </div>
+
+                                            <div className="provider-info">
+                                                {provider.contacto && (
+                                                    <div className="info-row">
+                                                        <FiUser size={16} />
+                                                        <span>{provider.contacto}</span>
+                                                    </div>
+                                                )}
+                                                {provider.telefono && (
+                                                    <div className="info-row">
+                                                        <FiPhone size={16} />
+                                                        <span>{provider.telefono}</span>
+                                                    </div>
+                                                )}
+                                                {provider.correo && (
+                                                    <div className="info-row">
+                                                        <FiMail size={16} />
+                                                        <span>{provider.correo}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="provider-stats">
+                                                <span className="stat-badge">
+                                                    {provider.total_productos} productos
+                                                </span>
+                                            </div>
+
+                                            <div className="provider-actions">
+                                                <button
+                                                    className="btn-view"
+                                                    onClick={() => fetchProductsByProvider(provider.nombre)}
+                                                >
+                                                    Ver Productos
+                                                </button>
+                                                <button
+                                                    className="btn-edit-icon"
+                                                    onClick={() => openModal(provider)}
+                                                    title="Editar"
+                                                >
+                                                    <FiEdit size={16} />
+                                                </button>
+                                                <button
+                                                    className="btn-delete-icon"
+                                                    onClick={() => handleDelete(provider.nombre)}
+                                                    title="Eliminar"
+                                                >
+                                                    <FiTrash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             ) : (
-                                <div className="no-data">No hay proveedores registrados</div>
+                                <div className="no-data-state">
+                                    <FiPackage size={64} />
+                                    <p>No hay proveedores registrados</p>
+                                    <button onClick={() => openModal()} className="btn-add-first">
+                                        Agregar Primer Proveedor
+                                    </button>
+                                </div>
                             )}
                         </>
                     ) : (
                         <>
                             <header className="page-header">
                                 <div className="title-section">
-                                    <button className="back-btn-alt" onClick={() => setSelectedProvider(null)}>
+                                    <button className="back-btn" onClick={() => setSelectedProvider(null)}>
                                         ← Volver
                                     </button>
                                     <h1>Productos de {selectedProvider}</h1>
@@ -245,10 +280,10 @@ const Providers = () => {
                             </header>
 
                             {loading ? (
-                                <div className="loading">Cargando productos...</div>
+                                <div className="loading-state">Cargando productos...</div>
                             ) : (
-                                <div className="table-wrapper">
-                                    <table className="table-styled">
+                                <div className="products-table-container">
+                                    <table className="products-table">
                                         <thead>
                                             <tr>
                                                 <th>SKU</th>
@@ -256,16 +291,24 @@ const Providers = () => {
                                                 <th>Categoría</th>
                                                 <th>Precio</th>
                                                 <th>Stock</th>
+                                                <th>Stock Mínimo</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {products.map((product) => (
-                                                <tr key={product.sku}>
-                                                    <td>{product.sku}</td>
-                                                    <td>{product.nombre}</td>
-                                                    <td>{product.categoria}</td>
-                                                    <td>S/ {product.price}</td>
-                                                    <td>{product.stock}</td>
+                                                <tr key={product.id}>
+                                                    <td className="sku-cell">{product.sku}</td>
+                                                    <td className="product-name">{product.nombre}</td>
+                                                    <td>
+                                                        <span className="category-badge">{product.categoria}</span>
+                                                    </td>
+                                                    <td className="price-cell">S/ {parseFloat(product.price).toFixed(2)}</td>
+                                                    <td className="text-center">
+                                                        <span className={`stock-indicator ${product.stock <= product.minStock ? 'low' : 'normal'}`}>
+                                                            {product.stock}
+                                                        </span>
+                                                    </td>
+                                                    <td className="text-center">{product.minStock}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -283,7 +326,7 @@ const Providers = () => {
                         <h3>{editingProvider ? "Editar Proveedor" : "Nuevo Proveedor"}</h3>
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
-                                <label>Nombre *</label>
+                                <label>Nombre del Proveedor *</label>
                                 <input
                                     type="text"
                                     value={formData.nombre}
@@ -292,7 +335,7 @@ const Providers = () => {
                                 />
                             </div>
                             <div className="form-group">
-                                <label>Contacto</label>
+                                <label>Persona de Contacto</label>
                                 <input
                                     type="text"
                                     value={formData.contacto}
@@ -308,11 +351,11 @@ const Providers = () => {
                                 />
                             </div>
                             <div className="form-group">
-                                <label>Email</label>
+                                <label>Correo Electrónico</label>
                                 <input
                                     type="email"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    value={formData.correo}
+                                    onChange={(e) => setFormData({ ...formData, correo: e.target.value })}
                                 />
                             </div>
                             <div className="modal-actions">

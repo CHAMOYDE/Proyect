@@ -8,7 +8,6 @@ import Inventory from "./pages/Inventory"
 import Providers from "./pages/Providers"
 import Sales from "./pages/Sales"
 import Predictions from "./pages/Predictions"
-import Purchases from "./pages/Purchases"
 import "./App.css"
 
 function App() {
@@ -55,14 +54,6 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Predictions />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/purchases"
-              element={
-                <ProtectedRoute>
-                  <Purchases />
                 </ProtectedRoute>
               }
             />

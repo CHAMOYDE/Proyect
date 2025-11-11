@@ -1,17 +1,22 @@
-const express = require('express');
+const express = require('express'); 
 const router = express.Router();
 
 // Middleware imports
-const { authMiddleware, checkRole, logAuthenticatedRequest } = require('../middleware/auth');
+const { authMiddleware, checkRole } = require('../middleware/auth');
 
 // Controller import
-const { predecirDemanda } = require('../controllers/predictions-controller');  // Función que integra ML
+const { predecirDemanda, getActiveProducts, getAllPredictions } = require('../controllers/predictions-controller');
 
-// Middleware global
+// Middleware global: autenticación
 router.use(authMiddleware);
-router.use(logAuthenticatedRequest);
 
-// Generar predicciones: Solo admin o analista (para decisiones estratégicas)
-router.post('/', checkRole(['admin', 'analista']), predecirDemanda);  // POST con body {productoId, dias: 30}
+// Generar predicciones (solo admin o analista)
+router.post('/', checkRole('administrador', 'analista'), predecirDemanda);
+
+// Obtener predicciones activas (para selector de productos)
+router.get('/active', getActiveProducts);
+
+// Obtener predicciones de todos los productos
+router.get('/all', getAllPredictions);
 
 module.exports = router;

@@ -1,29 +1,18 @@
-// RUTAS DE INVENTARIO
-// CRUD de productos con protección de roles
+const express = require("express");
+const router = express.Router();
+const inventoryController = require("../controllers/inventory-controller");
+const { authMiddleware, checkRole } = require("../middleware/auth");
 
-const express = require("express")
-const router = express.Router()
-const { authMiddleware, checkRole } = require("../middleware/auth")
-const {
-  getProducts,
-  getProductById,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-  getAlerts,
-} = require("../controllers/inventory-controller")
+// Rutas de inventario
+router.get("/", authMiddleware, inventoryController.getProducts);
+router.get("/:id", authMiddleware, inventoryController.getProductById);
 
-// Todas requieren autenticación
-router.use(authMiddleware)
+// Solo admin puede modificar inventario
+router.post("/", authMiddleware, checkRole("administrador"), inventoryController.createProduct);
+router.put("/:id", authMiddleware, checkRole("administrador"), inventoryController.updateProduct);
+router.delete("/:id", authMiddleware, checkRole("administrador"), inventoryController.deleteProduct);
 
-// GET - Lectura (todos autenticados)
-router.get("/", getProducts)
-router.get("/alerts", getAlerts)
-router.get("/:id", getProductById)
+// Alertas
+router.get("/alerts/low-stock", authMiddleware, inventoryController.getAlerts);
 
-// POST, PUT, DELETE - Solo admin
-router.post("/", checkRole("administrador"), createProduct)
-router.put("/:id", checkRole("administrador"), updateProduct)
-router.delete("/:id", checkRole("administrador"), deleteProduct)
-
-module.exports = router
+module.exports = router;
