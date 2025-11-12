@@ -1,44 +1,41 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import { inventoryService, salesService } from "../services/api";
-import { useNavigate } from "react-router-dom";
-import { FiMenu, FiChevronLeft } from "react-icons/fi";
-import {
-  BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
-} from "recharts";
-import Header from "../components/Header";
-import "./Dashboard.css";
+import { useEffect, useState } from "react"
+import { useAuth } from "../context/AuthContext"
+import { inventoryService, salesService } from "../services/api"
+import { useNavigate } from "react-router-dom"
+import { FiMenu, FiChevronLeft } from "react-icons/fi"
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import Header from "../components/Header"
+import "./Dashboard.css"
 
 const Dashboard = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth()
+  const navigate = useNavigate()
 
   const [stats, setStats] = useState({
     totalProducts: 0,
     lowStock: 0,
     expiring: 0,
-    totalSales: 0
-  });
-  const [chartData, setChartData] = useState([]);
-  const [categoryData, setCategoryData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+    totalSales: 0,
+  })
+  const [chartData, setChartData] = useState([])
+  const [categoryData, setCategoryData] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [isCollapsed, setIsCollapsed] = useState(false)
 
   useEffect(() => {
-    loadData();
-  }, []);
+    loadData()
+  }, [])
 
   const loadData = async () => {
     try {
       // Cargar productos
-      const productsRes = await inventoryService.getProducts();
-      console.log("Products Response:", productsRes.data);
+      const productsRes = await inventoryService.getProducts()
+      console.log("Products Response:", productsRes.data)
 
       // Los productos vienen en: productsRes.data.data
-      const products = (productsRes.data.data || []).map(p => ({
+      const products = (productsRes.data.data || []).map((p) => ({
         id: p.id,
         name: p.nombre,
         stock: p.stock,
@@ -46,81 +43,79 @@ const Dashboard = () => {
         price: p.price,
         sku: p.sku,
         category: p.categoria || "Otros",
-      }));
+      }))
 
       // Cargar ventas (solo si es admin)
-      let sales = [];
+      let sales = []
       if (user?.rol === "administrador") {
         try {
-          const salesRes = await salesService.getSales();
-          console.log("Sales Response:", salesRes.data);
+          const salesRes = await salesService.getSales()
+          console.log("Sales Response:", salesRes.data)
 
           // Las ventas vienen en: salesRes.data.sales
-          sales = (salesRes.data.sales || []).map(s => ({
+          sales = (salesRes.data.sales || []).map((s) => ({
             id: s.id,
             productId: s.productId,
             productName: s.productName,
             quantity: s.quantity,
             total: s.totalPrice,
             date: s.date,
-          }));
+          }))
         } catch (err) {
-          console.log("No se pudieron cargar las ventas (puede ser por permisos)");
+          console.log("No se pudieron cargar las ventas (puede ser por permisos)")
         }
       }
 
       // Calcular estadísticas
-      const lowStockCount = products.filter(p => p.stock <= p.minStock).length;
-      const totalSalesAmount = sales.reduce((sum, s) => sum + (s.total || 0), 0);
+      const lowStockCount = products.filter((p) => p.stock <= p.minStock).length
+      const totalSalesAmount = sales.reduce((sum, s) => sum + (s.total || 0), 0)
 
       setStats({
         totalProducts: products.length,
         lowStock: lowStockCount,
         expiring: Math.floor(products.length * 0.1),
         totalSales: totalSalesAmount,
-      });
+      })
 
       // Gráfico de ventas últimos 6 meses
-      const monthlySales = {};
+      const monthlySales = {}
       sales.forEach((sale) => {
-        const date = new Date(sale.date);
-        const month = date.toLocaleString("es-ES", { month: "short" });
-        const year = date.getFullYear();
-        const key = `${month} ${year}`;
-        monthlySales[key] = (monthlySales[key] || 0) + (sale.total || 0);
-      });
+        const date = new Date(sale.date)
+        const month = date.toLocaleString("es-ES", { month: "short" })
+        const year = date.getFullYear()
+        const key = `${month} ${year}`
+        monthlySales[key] = (monthlySales[key] || 0) + (sale.total || 0)
+      })
 
       setChartData(
         Object.entries(monthlySales)
           .map(([mes, ventas]) => ({ mes, ventas }))
-          .slice(-6) // Últimos 6 meses
-      );
+          .slice(-6), // Últimos 6 meses
+      )
 
       // Gráfico de categorías
-      const categoryCount = {};
+      const categoryCount = {}
       products.forEach((p) => {
-        const cat = p.category || "Otros";
-        categoryCount[cat] = (categoryCount[cat] || 0) + 1;
-      });
+        const cat = p.category || "Otros"
+        categoryCount[cat] = (categoryCount[cat] || 0) + 1
+      })
 
-      setCategoryData(
-        Object.entries(categoryCount).map(([name, value]) => ({ name, value }))
-      );
+      setCategoryData(Object.entries(categoryCount).map(([name, value]) => ({ name, value })))
 
-      setLoading(false);
+      setLoading(false)
     } catch (error) {
-      console.error("Error cargando dashboard:", error);
-      alert("Error al cargar los datos del dashboard");
-      setLoading(false);
+      console.error("Error cargando dashboard:", error)
+      alert("Error al cargar los datos del dashboard")
+      setLoading(false)
     }
-  };
+  }
 
-  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
-  const COLORS = ["#6366f1", "#8b5cf6", "#d946ef", "#ec4899", "#f43f5e"];
+  const toggleSidebar = () => setIsCollapsed(!isCollapsed)
+  const COLORS = ["#6366f1", "#8b5cf6", "#d946ef", "#ec4899", "#f43f5e"]
 
   return (
     <>
-      <Header />
+      <Header isCollapsed={isCollapsed} />
       <div className="dashboard-wrapper">
         <aside className={`sidebar ${isCollapsed ? "closed" : "open"}`}>
           <div className="sidebar-header">
@@ -223,9 +218,9 @@ const Dashboard = () => {
                       cy="50%"
                       labelLine={false}
                       label={({ name, value }) => {
-                        const total = categoryData.reduce((a, b) => a + b.value, 0);
-                        const percent = Math.round((value / total) * 100);
-                        return `${name}: ${percent}%`;
+                        const total = categoryData.reduce((a, b) => a + b.value, 0)
+                        const percent = Math.round((value / total) * 100)
+                        return `${name}: ${percent}%`
                       }}
                       outerRadius={80}
                       fill="#8884d8"
@@ -246,7 +241,7 @@ const Dashboard = () => {
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default Dashboard;
+export default Dashboard

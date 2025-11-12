@@ -584,6 +584,7 @@
 }
 
 /* DROPDOWN HISTORICO */
+/* Mejorar la transición y visibilidad del dropdown */
 .history-dropdown {
   background: #141829;
   border-radius: 12px;
@@ -597,7 +598,7 @@
 }
 
 .history-dropdown.open {
-  max-height: 500px;
+  max-height: 600px;
   opacity: 1;
   margin-bottom: 30px;
   border-color: #1f2942;
@@ -679,4 +680,84 @@
   padding: 20px;
   background: #141829;
   border-bottom: 1px solid rgba(0, 200, 255, 0.2);
+}
+
+/* Added modern styles for date input fields in the PDF options panel */
+.pdf-options-panel {
+  background: #141829;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #1f2942;
+  box-shadow: 0 4px 15px rgba(0, 150, 220, 0.1);
+}
+
+.pdf-options-panel h4 {
+  color: #00ffff;
+  font-size: 1.1rem;
+  margin: 0 0 16px;
+  font-weight: 600;
+}
+
+.date-range-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.date-range-inputs .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.date-range-inputs .form-group label {
+  color: #b0b0b0;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.date-range-inputs .form-group input[type="date"] {
+  padding: 12px 16px;
+  background: #0a0e27;
+  border: 1.5px solid rgba(0, 150, 220, 0.3);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.date-range-inputs .form-group input[type="date"]:hover {
+  border-color: rgba(0, 150, 220, 0.6);
+  box-shadow: 0 0 12px rgba(0, 150, 220, 0.1);
+}
+
+.date-range-inputs .form-group input[type="date"]:focus {
+  outline: none;
+  border-color: #00c8ff;
+  box-shadow: 0 0 16px rgba(0, 150, 220, 0.2);
+  background: #0d1535;
+}
+
+.btn-generate-pdf {
+  background: linear-gradient(135deg, #0096dc 0%, #00c8ff 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.btn-generate-pdf:hover {
+  background: linear-gradient(135deg, #00c8ff 0%, #00ffff 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 150, 220, 0.3);
 }

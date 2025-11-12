@@ -401,3 +401,48 @@ body.dark-mode .recharts-legend-item-text {
 .recharts-cartesian-grid-vertical line {
   stroke: rgba(0, 200, 255, 0.1) !important;
 }
+
+/* Override select/dropdown styles to ensure modern design shows */
+body.dark-mode select,
+select {
+  background: linear-gradient(135deg, #141829 0%, #1a1f3a 100%);
+  border: 2px solid #1f2942;
+  border-radius: 8px;
+  color: #00ffff;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 150, 220, 0.15);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300ffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 20px;
+  padding-right: 40px;
+}
+
+select:hover {
+  border-color: #00c8ff;
+  box-shadow: 0 6px 16px rgba(0, 200, 255, 0.25);
+}
+
+select:focus {
+  outline: none;
+  border-color: #00ffff;
+  box-shadow: 0 0 0 3px rgba(0, 200, 255, 0.2);
+}
+
+select option {
+  background: #141829;
+  color: #00ffff;
+  padding: 10px;
+}
+
+select option:hover {
+  background: #0096dc;
+  color: white;
+}

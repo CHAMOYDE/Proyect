@@ -248,6 +248,32 @@
   box-shadow: 0 4px 12px rgba(0, 150, 220, 0.3);
 }
 
+/* Added unified button styling for download button - now matches other buttons */
+.btn-download-list {
+  background: linear-gradient(135deg, #0096dc 0%, #00c8ff 100%);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 150, 220, 0.3);
+}
+
+.btn-download-list:hover {
+  background: linear-gradient(135deg, #00c8ff 0%, #00ffff 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 150, 220, 0.4);
+}
+
+.btn-download-list:active {
+  transform: translateY(0);
+}
+
 .prediction-result {
   background-color: #141829;
   padding: 20px;

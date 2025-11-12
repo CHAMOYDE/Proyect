@@ -44,10 +44,9 @@ const Providers = () => {
         try {
             setLoading(true)
             const token = localStorage.getItem("token")
-            const response = await fetch(
-                `http://localhost:5000/api/providers/${encodeURIComponent(providerName)}/products`,
-                { headers: { Authorization: `Bearer ${token}` } }
-            )
+            const response = await fetch(`http://localhost:5000/api/providers/${encodeURIComponent(providerName)}/products`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
             const data = await response.json()
             if (data.success) {
                 setProducts(data.products)
@@ -88,17 +87,14 @@ const Providers = () => {
             let response
 
             if (editingProvider) {
-                response = await fetch(
-                    `http://localhost:5000/api/providers/${encodeURIComponent(editingProvider.nombre)}`,
-                    {
-                        method: "PUT",
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(formData),
-                    }
-                )
+                response = await fetch(`http://localhost:5000/api/providers/${encodeURIComponent(editingProvider.nombre)}`, {
+                    method: "PUT",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(formData),
+                })
             } else {
                 response = await fetch("http://localhost:5000/api/providers", {
                     method: "POST",
@@ -126,13 +122,10 @@ const Providers = () => {
         if (window.confirm(`¿Eliminar el proveedor "${nombre}"?`)) {
             try {
                 const token = localStorage.getItem("token")
-                const response = await fetch(
-                    `http://localhost:5000/api/providers/${encodeURIComponent(nombre)}`,
-                    {
-                        method: "DELETE",
-                        headers: { Authorization: `Bearer ${token}` },
-                    }
-                )
+                const response = await fetch(`http://localhost:5000/api/providers/${encodeURIComponent(nombre)}`, {
+                    method: "DELETE",
+                    headers: { Authorization: `Bearer ${token}` },
+                })
 
                 const data = await response.json()
                 if (data.success) {
@@ -150,7 +143,7 @@ const Providers = () => {
 
     return (
         <>
-            <Header />
+            <Header isCollapsed={isCollapsed} />
             <div className="dashboard-wrapper">
                 <aside className={`sidebar ${isCollapsed ? "closed" : "open"}`}>
                     <div className="sidebar-header">
@@ -227,23 +220,14 @@ const Providers = () => {
                                             </div>
 
                                             <div className="provider-stats">
-                                                <span className="stat-badge">
-                                                    {provider.total_productos} productos
-                                                </span>
+                                                <span className="stat-badge">{provider.total_productos} productos</span>
                                             </div>
 
                                             <div className="provider-actions">
-                                                <button
-                                                    className="btn-view"
-                                                    onClick={() => fetchProductsByProvider(provider.nombre)}
-                                                >
+                                                <button className="btn-view" onClick={() => fetchProductsByProvider(provider.nombre)}>
                                                     Ver Productos
                                                 </button>
-                                                <button
-                                                    className="btn-edit-icon"
-                                                    onClick={() => openModal(provider)}
-                                                    title="Editar"
-                                                >
+                                                <button className="btn-edit-icon" onClick={() => openModal(provider)} title="Editar">
                                                     <FiEdit size={16} />
                                                 </button>
                                                 <button
@@ -302,9 +286,9 @@ const Providers = () => {
                                                     <td>
                                                         <span className="category-badge">{product.categoria}</span>
                                                     </td>
-                                                    <td className="price-cell">S/ {parseFloat(product.price).toFixed(2)}</td>
+                                                    <td className="price-cell">S/ {Number.parseFloat(product.price).toFixed(2)}</td>
                                                     <td className="text-center">
-                                                        <span className={`stock-indicator ${product.stock <= product.minStock ? 'low' : 'normal'}`}>
+                                                        <span className={`stock-indicator ${product.stock <= product.minStock ? "low" : "normal"}`}>
                                                             {product.stock}
                                                         </span>
                                                     </td>

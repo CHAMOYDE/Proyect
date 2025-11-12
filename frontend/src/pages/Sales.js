@@ -4,8 +4,8 @@ import { useEffect, useState } from "react"
 import { useAuth } from "../context/AuthContext"
 import { salesService, inventoryService } from "../services/api"
 import { useNavigate } from "react-router-dom"
-import { jsPDF } from "jspdf"
-import "jspdf-autotable"
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import { FiMenu, FiChevronLeft, FiDownload, FiChevronDown, FiChevronUp } from "react-icons/fi"
 import Header from "../components/Header"
 import "./Sales.css"
@@ -26,7 +26,7 @@ const Sales = () => {
         quantity: "",
         discount: "0",
         paymentMethod: "efectivo",
-        isSeason: false
+        isSeason: false,
     })
     const [isCollapsed, setIsCollapsed] = useState(false)
 
@@ -36,14 +36,9 @@ const Sales = () => {
 
     const loadData = async () => {
         try {
-            const [salesRes, productsRes] = await Promise.all([
-                salesService.getSales(),
-                inventoryService.getProducts()
-            ])
+            const [salesRes, productsRes] = await Promise.all([salesService.getSales(), inventoryService.getProducts()])
 
-            const sortedSales = (salesRes.data.sales || []).sort(
-                (a, b) => new Date(b.date) - new Date(a.date)
-            )
+            const sortedSales = (salesRes.data.sales || []).sort((a, b) => new Date(b.date) - new Date(a.date))
             setSales(sortedSales)
             setProducts(productsRes.data.data || [])
             setLoading(false)
@@ -64,7 +59,7 @@ const Sales = () => {
             quantity: "",
             discount: "0",
             paymentMethod: "efectivo",
-            isSeason: false
+            isSeason: false,
         })
         setShowModal(true)
     }
@@ -75,7 +70,7 @@ const Sales = () => {
         const { name, value, type, checked } = e.target
         setFormData({
             ...formData,
-            [name]: type === "checkbox" ? checked : value
+            [name]: type === "checkbox" ? checked : value,
         })
     }
 
@@ -83,11 +78,11 @@ const Sales = () => {
         e.preventDefault()
         try {
             await salesService.createSale({
-                productId: parseInt(formData.productId),
-                quantity: parseInt(formData.quantity),
-                discount: parseFloat(formData.discount),
+                productId: Number.parseInt(formData.productId),
+                quantity: Number.parseInt(formData.quantity),
+                discount: Number.parseFloat(formData.discount),
                 paymentMethod: formData.paymentMethod,
-                isSeason: formData.isSeason
+                isSeason: formData.isSeason,
             })
             loadData()
             closeModal()
@@ -103,10 +98,10 @@ const Sales = () => {
 
     const calculateTotal = () => {
         if (!formData.productId || !formData.quantity) return 0
-        const product = getProductById(parseInt(formData.productId))
+        const product = getProductById(Number.parseInt(formData.productId))
         if (!product) return 0
         const subtotal = product.price * formData.quantity
-        const discount = (subtotal * parseFloat(formData.discount)) / 100
+        const discount = (subtotal * Number.parseFloat(formData.discount)) / 100
         return subtotal - discount
     }
 
@@ -120,7 +115,7 @@ const Sales = () => {
         // Filtrar ventas por rango de fechas
         let filteredSales = sales
         if (dateRange && dateRange.start && dateRange.end) {
-            filteredSales = sales.filter(sale => {
+            filteredSales = sales.filter((sale) => {
                 const saleDate = new Date(sale.date)
                 return saleDate >= new Date(dateRange.start) && saleDate <= new Date(dateRange.end)
             })
@@ -150,14 +145,14 @@ const Sales = () => {
         // Información del reporte
         doc.setTextColor(51, 65, 85)
         doc.setFontSize(10)
-        doc.text(`Generado: ${new Date().toLocaleString('es-PE')}`, 15, 60)
+        doc.text(`Generado: ${new Date().toLocaleString("es-PE")}`, 15, 60)
         doc.text(`Usuario: ${user?.nombre || "N/A"}`, 15, 67)
 
         if (dateRange && dateRange.start && dateRange.end) {
             doc.text(
-                `Período: ${new Date(dateRange.start).toLocaleDateString('es-PE')} - ${new Date(dateRange.end).toLocaleDateString('es-PE')}`,
+                `Período: ${new Date(dateRange.start).toLocaleDateString("es-PE")} - ${new Date(dateRange.end).toLocaleDateString("es-PE")}`,
                 15,
-                74
+                74,
             )
         }
 
@@ -179,15 +174,15 @@ const Sales = () => {
         doc.text(`Monto Total: S/ ${totalVentas.toFixed(2)}`, 20, 108)
 
         // Tabla de ventas
-        const tableData = filteredSales.map(sale => {
+        const tableData = filteredSales.map((sale) => {
             const product = getProductById(sale.productId)
             return [
-                new Date(sale.date).toLocaleDateString('es-PE'),
+                new Date(sale.date).toLocaleDateString("es-PE"),
                 product?.nombre || sale.productName || "N/A",
                 sale.quantity,
                 `S/ ${(sale.totalPrice / sale.quantity).toFixed(2)}`,
                 sale.discount ? `${sale.discount}%` : "0%",
-                `S/ ${sale.totalPrice.toFixed(2)}`
+                `S/ ${sale.totalPrice.toFixed(2)}`,
             ]
         })
 
@@ -201,14 +196,14 @@ const Sales = () => {
                 textColor: 255,
                 fontSize: 10,
                 fontStyle: "bold",
-                halign: "center"
+                halign: "center",
             },
             bodyStyles: {
                 fontSize: 9,
-                textColor: 51
+                textColor: 51,
             },
             alternateRowStyles: {
-                fillColor: [248, 250, 252]
+                fillColor: [248, 250, 252],
             },
             columnStyles: {
                 0: { halign: "center", cellWidth: 25 },
@@ -216,9 +211,9 @@ const Sales = () => {
                 2: { halign: "center", cellWidth: 20 },
                 3: { halign: "right", cellWidth: 25 },
                 4: { halign: "center", cellWidth: 20 },
-                5: { halign: "right", cellWidth: 25 }
+                5: { halign: "right", cellWidth: 25 },
             },
-            margin: { left: 15, right: 15 }
+            margin: { left: 15, right: 15 },
         })
 
         // Footer
@@ -229,24 +224,15 @@ const Sales = () => {
 
             doc.setFontSize(8)
             doc.setTextColor(100, 116, 139)
-            doc.text(
-                "Sistema de Gestión de Inventario | D & R E.I.R.L.",
-                pageWidth / 2,
-                pageHeight - 15,
-                { align: "center" }
-            )
-            doc.text(
-                `Página 1 | www.dyrcompany.com`,
-                pageWidth / 2,
-                pageHeight - 10,
-                { align: "center" }
-            )
+            doc.text("Sistema de Gestión de Inventario | D & R E.I.R.L.", pageWidth / 2, pageHeight - 15, { align: "center" })
+            doc.text(`Página 1 | www.dyrcompany.com`, pageWidth / 2, pageHeight - 10, { align: "center" })
         }
 
         // Guardar PDF
-        const fileName = dateRange && dateRange.start && dateRange.end
-            ? `Ventas_${dateRange.start}_${dateRange.end}.pdf`
-            : `Ventas_${new Date().toISOString().split("T")[0]}.pdf`
+        const fileName =
+            dateRange && dateRange.start && dateRange.end
+                ? `Ventas_${dateRange.start}_${dateRange.end}.pdf`
+                : `Ventas_${new Date().toISOString().split("T")[0]}.pdf`
 
         doc.save(fileName)
         setShowPdfOptions(false)
@@ -262,7 +248,7 @@ const Sales = () => {
 
     return (
         <>
-            <Header />
+            <Header isCollapsed={isCollapsed} />
             <div className="dashboard-wrapper">
                 <aside className={`sidebar ${isCollapsed ? "closed" : "open"}`}>
                     <div className="sidebar-header">
@@ -356,9 +342,7 @@ const Sales = () => {
                                                 <span className="quantity">x{sale.quantity}</span>
                                             </div>
                                             <div className="history-details">
-                                                <span className="date">
-                                                    {new Date(sale.date).toLocaleDateString('es-PE')}
-                                                </span>
+                                                <span className="date">{new Date(sale.date).toLocaleDateString("es-PE")}</span>
                                                 <span className="total">S/ {sale.totalPrice.toFixed(2)}</span>
                                             </div>
                                         </div>
@@ -368,54 +352,50 @@ const Sales = () => {
                         </div>
                     </div>
 
-                    <div className="sales-table-wrapper">
-                        <h3>Historial Completo</h3>
-                        <table className="sales-table">
-                            <thead>
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Producto</th>
-                                    <th>Cantidad</th>
-                                    <th>P. Unitario</th>
-                                    <th>Descuento</th>
-                                    <th>Total</th>
-                                    <th>Método Pago</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {sales.length === 0 ? (
+                    {!showHistory && (
+                        <div className="sales-table-wrapper">
+                            <h3>Historial Completo</h3>
+                            <table className="sales-table">
+                                <thead>
                                     <tr>
-                                        <td colSpan="7" className="no-data">
-                                            No hay ventas registradas
-                                        </td>
+                                        <th>Fecha</th>
+                                        <th>Producto</th>
+                                        <th>Cantidad</th>
+                                        <th>P. Unitario</th>
+                                        <th>Descuento</th>
+                                        <th>Total</th>
+                                        <th>Método Pago</th>
                                     </tr>
-                                ) : (
-                                    sales.map((sale) => {
-                                        const product = getProductById(sale.productId)
-                                        return (
-                                            <tr key={sale.id}>
-                                                <td>{new Date(sale.date).toLocaleDateString('es-PE')}</td>
-                                                <td>{product?.nombre || sale.productName || "N/A"}</td>
-                                                <td className="text-center">{sale.quantity}</td>
-                                                <td className="text-right">
-                                                    S/ {(sale.totalPrice / sale.quantity).toFixed(2)}
-                                                </td>
-                                                <td className="text-center">
-                                                    {sale.discount ? `${sale.discount}%` : "0%"}
-                                                </td>
-                                                <td className="total-amount">S/ {sale.totalPrice.toFixed(2)}</td>
-                                                <td>
-                                                    <span className="payment-badge">
-                                                        {sale.paymentMethod || "Efectivo"}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        )
-                                    })
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    {sales.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="7" className="no-data">
+                                                No hay ventas registradas
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        sales.map((sale) => {
+                                            const product = getProductById(sale.productId)
+                                            return (
+                                                <tr key={sale.id}>
+                                                    <td>{new Date(sale.date).toLocaleDateString("es-PE")}</td>
+                                                    <td>{product?.nombre || sale.productName || "N/A"}</td>
+                                                    <td className="text-center">{sale.quantity}</td>
+                                                    <td className="text-right">S/ {(sale.totalPrice / sale.quantity).toFixed(2)}</td>
+                                                    <td className="text-center">{sale.discount ? `${sale.discount}%` : "0%"}</td>
+                                                    <td className="total-amount">S/ {sale.totalPrice.toFixed(2)}</td>
+                                                    <td>
+                                                        <span className="payment-badge">{sale.paymentMethod || "Efectivo"}</span>
+                                                    </td>
+                                                </tr>
+                                            )
+                                        })
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
                 </div>
 
                 {showModal && (
@@ -425,12 +405,7 @@ const Sales = () => {
                             <form onSubmit={handleSubmit}>
                                 <div className="form-group">
                                     <label>Producto *</label>
-                                    <select
-                                        name="productId"
-                                        value={formData.productId}
-                                        onChange={handleInputChange}
-                                        required
-                                    >
+                                    <select name="productId" value={formData.productId} onChange={handleInputChange} required>
                                         <option value="">Selecciona un producto</option>
                                         {products.map((p) => (
                                             <option key={p.id} value={p.id}>
@@ -469,11 +444,7 @@ const Sales = () => {
 
                                 <div className="form-group">
                                     <label>Método de Pago</label>
-                                    <select
-                                        name="paymentMethod"
-                                        value={formData.paymentMethod}
-                                        onChange={handleInputChange}
-                                    >
+                                    <select name="paymentMethod" value={formData.paymentMethod} onChange={handleInputChange}>
                                         <option value="efectivo">Efectivo</option>
                                         <option value="tarjeta">Tarjeta</option>
                                         <option value="transferencia">Transferencia</option>
@@ -483,12 +454,7 @@ const Sales = () => {
 
                                 <div className="form-group">
                                     <label className="checkbox-label">
-                                        <input
-                                            type="checkbox"
-                                            name="isSeason"
-                                            checked={formData.isSeason}
-                                            onChange={handleInputChange}
-                                        />
+                                        <input type="checkbox" name="isSeason" checked={formData.isSeason} onChange={handleInputChange} />
                                         <span>¿Es temporada alta?</span>
                                     </label>
                                 </div>
@@ -500,8 +466,7 @@ const Sales = () => {
                                             <span>
                                                 S/{" "}
                                                 {(
-                                                    (getProductById(parseInt(formData.productId))?.price || 0) *
-                                                    formData.quantity
+                                                    (getProductById(Number.parseInt(formData.productId))?.price || 0) * formData.quantity
                                                 ).toFixed(2)}
                                             </span>
                                         </div>
@@ -511,9 +476,9 @@ const Sales = () => {
                                                 <span>
                                                     - S/{" "}
                                                     {(
-                                                        ((getProductById(parseInt(formData.productId))?.price || 0) *
+                                                        ((getProductById(Number.parseInt(formData.productId))?.price || 0) *
                                                             formData.quantity *
-                                                            parseFloat(formData.discount)) /
+                                                            Number.parseFloat(formData.discount)) /
                                                         100
                                                     ).toFixed(2)}
                                                 </span>

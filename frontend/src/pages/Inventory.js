@@ -1,51 +1,51 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import { inventoryService } from "../services/api";
-import { useNavigate } from "react-router-dom";
-import { FiMenu, FiChevronLeft, FiSearch, FiEdit, FiTrash2, FiPlus } from "react-icons/fi";
-import Header from "../components/Header";
-import "./Inventory.css";
+import { useEffect, useState } from "react"
+import { useAuth } from "../context/AuthContext"
+import { inventoryService } from "../services/api"
+import { useNavigate } from "react-router-dom"
+import { FiMenu, FiChevronLeft, FiSearch, FiEdit, FiTrash2, FiPlus } from "react-icons/fi"
+import Header from "../components/Header"
+import "./Inventory.css"
 
 const Inventory = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth()
+  const navigate = useNavigate()
 
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [newCategory, setNewCategory] = useState("");
+  const [products, setProducts] = useState([])
+  const [filteredProducts, setFilteredProducts] = useState([])
+  const [categories, setCategories] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [showModal, setShowModal] = useState(false)
+  const [showCategoryModal, setShowCategoryModal] = useState(false)
+  const [editingProduct, setEditingProduct] = useState(null)
+  const [newCategory, setNewCategory] = useState("")
   const [formData, setFormData] = useState({
     name: "",
     category: "",
     stock: "",
     minStock: "",
     price: "",
-    supplier: ""
-  });
-  const [isCollapsed, setIsCollapsed] = useState(false);
+    supplier: "",
+  })
+  const [isCollapsed, setIsCollapsed] = useState(false)
 
   // Prefijos de SKU por categoría
   const skuPrefixes = {
     laptop: "LAP",
     periferico: "PER",
     accesorio: "ACC",
-    consumible: "CON"
-  };
+    consumible: "CON",
+  }
 
   useEffect(() => {
-    loadProducts();
-  }, []);
+    loadProducts()
+  }, [])
 
   const loadProducts = async () => {
     try {
-      const res = await inventoryService.getProducts();
+      const res = await inventoryService.getProducts()
       const productsMapped = (res.data.data || []).map((p) => ({
         id: p.id,
         name: p.nombre,
@@ -54,119 +54,117 @@ const Inventory = () => {
         price: p.price,
         sku: p.sku,
         category: p.categoria || "Otros",
-        supplier: p.supplier || ""
-      }));
+        supplier: p.supplier || "",
+      }))
 
-      setProducts(productsMapped);
-      setFilteredProducts(productsMapped);
+      setProducts(productsMapped)
+      setFilteredProducts(productsMapped)
 
       // Extraer categorías únicas
-      const uniqueCategories = [...new Set(productsMapped.map(p => p.category))];
-      setCategories(uniqueCategories);
+      const uniqueCategories = [...new Set(productsMapped.map((p) => p.category))]
+      setCategories(uniqueCategories)
 
-      setLoading(false);
+      setLoading(false)
     } catch (error) {
-      alert("Error al cargar productos");
-      setLoading(false);
+      alert("Error al cargar productos")
+      setLoading(false)
     }
-  };
+  }
 
-  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+  const toggleSidebar = () => setIsCollapsed(!isCollapsed)
 
   const handleSearch = (e) => {
-    const term = e.target.value.toLowerCase();
-    setSearchTerm(term);
-    const filtered = products.filter(
-      (p) => p.name.toLowerCase().includes(term) || p.sku.toLowerCase().includes(term)
-    );
-    setFilteredProducts(filtered);
-  };
+    const term = e.target.value.toLowerCase()
+    setSearchTerm(term)
+    const filtered = products.filter((p) => p.name.toLowerCase().includes(term) || p.sku.toLowerCase().includes(term))
+    setFilteredProducts(filtered)
+  }
 
   const generateSKU = (category) => {
-    const prefix = skuPrefixes[category.toLowerCase()] || "GEN";
-    const timestamp = Date.now().toString().slice(-6);
-    return `${prefix}-${timestamp}`;
-  };
+    const prefix = skuPrefixes[category.toLowerCase()] || "GEN"
+    const timestamp = Date.now().toString().slice(-6)
+    return `${prefix}-${timestamp}`
+  }
 
   const openModal = (product = null) => {
     if (product) {
-      setEditingProduct(product);
+      setEditingProduct(product)
       setFormData({
         name: product.name,
         category: product.category || "",
         stock: product.stock,
         minStock: product.minStock,
         price: product.price,
-        supplier: product.supplier || ""
-      });
+        supplier: product.supplier || "",
+      })
     } else {
-      setEditingProduct(null);
+      setEditingProduct(null)
       setFormData({
         name: "",
         category: categories[0] || "",
         stock: "",
         minStock: "",
         price: "",
-        supplier: ""
-      });
+        supplier: "",
+      })
     }
-    setShowModal(true);
-  };
+    setShowModal(true)
+  }
 
   const closeModal = () => {
-    setShowModal(false);
-    setEditingProduct(null);
-  };
+    setShowModal(false)
+    setEditingProduct(null)
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
       const payload = {
         ...formData,
-        sku: editingProduct ? editingProduct.sku : generateSKU(formData.category)
-      };
+        sku: editingProduct ? editingProduct.sku : generateSKU(formData.category),
+      }
 
       if (editingProduct) {
-        await inventoryService.updateProduct(editingProduct.id, payload);
+        await inventoryService.updateProduct(editingProduct.id, payload)
       } else {
-        await inventoryService.createProduct(payload);
+        await inventoryService.createProduct(payload)
       }
-      loadProducts();
-      closeModal();
+      loadProducts()
+      closeModal()
     } catch (error) {
-      alert(error.response?.data?.message || "Error al guardar producto");
+      alert(error.response?.data?.message || "Error al guardar producto")
     }
-  };
+  }
 
   const handleDelete = async (id) => {
     if (window.confirm("¿Eliminar este producto?")) {
       try {
-        await inventoryService.deleteProduct(id);
-        loadProducts();
+        await inventoryService.deleteProduct(id)
+        loadProducts()
       } catch (error) {
-        alert("Error al eliminar");
+        alert("Error al eliminar")
       }
     }
-  };
+  }
 
   const addNewCategory = () => {
     if (newCategory.trim() && !categories.includes(newCategory.trim())) {
-      setCategories([...categories, newCategory.trim()]);
-      setFormData({ ...formData, category: newCategory.trim() });
-      setNewCategory("");
-      setShowCategoryModal(false);
+      setCategories([...categories, newCategory.trim()])
+      setFormData({ ...formData, category: newCategory.trim() })
+      setNewCategory("")
+      setShowCategoryModal(false)
     }
-  };
+  }
 
   const getStockColor = (stock, minStock) => {
-    if (stock <= minStock) return "low";
-    if (stock <= minStock * 1.5) return "medium";
-    return "high";
-  };
+    if (stock <= minStock) return "low"
+    if (stock <= minStock * 1.5) return "medium"
+    return "high"
+  }
 
   return (
     <>
-      <Header />
+      <Header isCollapsed={isCollapsed} />
       <div className="dashboard-wrapper">
         <aside className={`sidebar ${isCollapsed ? "closed" : "open"}`}>
           <div className="sidebar-header">
@@ -179,11 +177,19 @@ const Inventory = () => {
           </div>
 
           <nav className="sidebar-nav">
-            <button onClick={() => navigate("/dashboard")} className="nav-item">Inicio</button>
+            <button onClick={() => navigate("/dashboard")} className="nav-item">
+              Inicio
+            </button>
             <button className="nav-item active">Inventario</button>
-            <button onClick={() => navigate("/sales")} className="nav-item">Ventas</button>
-            <button onClick={() => navigate("/predictions")} className="nav-item">Predicciones</button>
-            <button onClick={() => navigate("/providers")} className="nav-item">Proveedores</button>
+            <button onClick={() => navigate("/sales")} className="nav-item">
+              Ventas
+            </button>
+            <button onClick={() => navigate("/predictions")} className="nav-item">
+              Predicciones
+            </button>
+            <button onClick={() => navigate("/providers")} className="nav-item">
+              Proveedores
+            </button>
           </nav>
 
           <div className="sidebar-footer">
@@ -235,12 +241,10 @@ const Inventory = () => {
                     <span className="category-badge">{p.category}</span>
                   </td>
                   <td>
-                    <span className={`stock-badge ${getStockColor(p.stock, p.minStock)}`}>
-                      {p.stock}
-                    </span>
+                    <span className={`stock-badge ${getStockColor(p.stock, p.minStock)}`}>{p.stock}</span>
                   </td>
                   <td>{p.minStock}</td>
-                  <td className="price-cell">S/ {parseFloat(p.price).toFixed(2)}</td>
+                  <td className="price-cell">S/ {Number.parseFloat(p.price).toFixed(2)}</td>
                   <td>{p.supplier || "N/A"}</td>
                   <td className="actions-cell">
                     <button onClick={() => openModal(p)} className="btn-edit">
@@ -286,11 +290,7 @@ const Inventory = () => {
                           </option>
                         ))}
                       </select>
-                      <button
-                        type="button"
-                        className="btn-add-category"
-                        onClick={() => setShowCategoryModal(true)}
-                      >
+                      <button type="button" className="btn-add-category" onClick={() => setShowCategoryModal(true)}>
                         <FiPlus size={16} />
                       </button>
                     </div>
@@ -373,11 +373,7 @@ const Inventory = () => {
                   />
                 </div>
                 <div className="modal-actions">
-                  <button
-                    type="button"
-                    onClick={() => setShowCategoryModal(false)}
-                    className="btn-cancel"
-                  >
+                  <button type="button" onClick={() => setShowCategoryModal(false)} className="btn-cancel">
                     Cancelar
                   </button>
                   <button type="button" onClick={addNewCategory} className="btn-submit">
@@ -390,7 +386,7 @@ const Inventory = () => {
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default Inventory;
+export default Inventory

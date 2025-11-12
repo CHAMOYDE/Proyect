@@ -80,7 +80,7 @@ const Predictions = () => {
             // Generar datos para el gráfico
             const chartData = Array.from({ length: 30 }, (_, idx) => ({
                 day: `Día ${idx + 1}`,
-                demanda: Math.round(pred.avgDailySales * (1 + (Math.random() - 0.5) * 0.3))
+                demanda: Math.round(pred.avgDailySales * (1 + (Math.random() - 0.5) * 0.3)),
             }))
 
             setPredictionData(chartData)
@@ -96,11 +96,16 @@ const Predictions = () => {
 
     const getPriorityColor = (priority) => {
         switch (priority) {
-            case "CRITICA": return "critical"
-            case "ALTA": return "high"
-            case "MEDIA": return "medium"
-            case "BAJA": return "low"
-            default: return "low"
+            case "CRITICA":
+                return "critical"
+            case "ALTA":
+                return "high"
+            case "MEDIA":
+                return "medium"
+            case "BAJA":
+                return "low"
+            default:
+                return "low"
         }
     }
 
@@ -131,13 +136,11 @@ const Predictions = () => {
         // Información
         doc.setTextColor(51, 65, 85)
         doc.setFontSize(10)
-        doc.text(`Generado: ${new Date().toLocaleString('es-PE')}`, 15, 60)
+        doc.text(`Generado: ${new Date().toLocaleString("es-PE")}`, 15, 60)
         doc.text(`Usuario: ${user?.nombre || "N/A"}`, 15, 67)
 
         // Filtrar productos que necesitan reabastecimiento
-        const criticalProducts = allPredictions.filter(
-            p => p.priority === "CRITICA" || p.priority === "ALTA"
-        )
+        const criticalProducts = allPredictions.filter((p) => p.priority === "CRITICA" || p.priority === "ALTA")
 
         // Resumen
         doc.setFillColor(254, 226, 226)
@@ -152,12 +155,12 @@ const Predictions = () => {
         doc.text(`Total de productos a reabastecer: ${criticalProducts.length}`, 20, 93)
 
         // Tabla de productos
-        const tableData = criticalProducts.map(p => [
+        const tableData = criticalProducts.map((p) => [
             p.productName,
             p.currentStock.toString(),
             p.daysUntilStockout.toString(),
             p.recommendedOrder.toString(),
-            p.priority
+            p.priority,
         ])
 
         doc.autoTable({
@@ -170,23 +173,23 @@ const Predictions = () => {
                 textColor: 255,
                 fontSize: 10,
                 fontStyle: "bold",
-                halign: "center"
+                halign: "center",
             },
             bodyStyles: {
                 fontSize: 9,
-                textColor: 51
+                textColor: 51,
             },
             alternateRowStyles: {
-                fillColor: [254, 242, 242]
+                fillColor: [254, 242, 242],
             },
             columnStyles: {
                 0: { halign: "left", cellWidth: 70 },
                 1: { halign: "center", cellWidth: 25 },
                 2: { halign: "center", cellWidth: 30 },
                 3: { halign: "center", cellWidth: 35 },
-                4: { halign: "center", cellWidth: 25 }
+                4: { halign: "center", cellWidth: 25 },
             },
-            margin: { left: 15, right: 15 }
+            margin: { left: 15, right: 15 },
         })
 
         // Recomendaciones
@@ -215,19 +218,14 @@ const Predictions = () => {
 
         doc.setFontSize(8)
         doc.setTextColor(100, 116, 139)
-        doc.text(
-            "Sistema Predictivo de Inventario | D & R E.I.R.L.",
-            pageWidth / 2,
-            pageHeight - 15,
-            { align: "center" }
-        )
+        doc.text("Sistema Predictivo de Inventario | D & R E.I.R.L.", pageWidth / 2, pageHeight - 15, { align: "center" })
 
         doc.save(`Lista_Compras_${new Date().toISOString().split("T")[0]}.pdf`)
     }
 
     return (
         <>
-            <Header />
+            <Header isCollapsed={isCollapsed} />
             <div className="dashboard-wrapper">
                 <aside className={`sidebar ${isCollapsed ? "closed" : "open"}`}>
                     <div className="sidebar-header">
@@ -240,11 +238,19 @@ const Predictions = () => {
                     </div>
 
                     <nav className="sidebar-nav">
-                        <button onClick={() => navigate("/dashboard")} className="nav-item">Inicio</button>
-                        <button onClick={() => navigate("/inventory")} className="nav-item">Inventario</button>
-                        <button onClick={() => navigate("/sales")} className="nav-item">Ventas</button>
+                        <button onClick={() => navigate("/dashboard")} className="nav-item">
+                            Inicio
+                        </button>
+                        <button onClick={() => navigate("/inventory")} className="nav-item">
+                            Inventario
+                        </button>
+                        <button onClick={() => navigate("/sales")} className="nav-item">
+                            Ventas
+                        </button>
                         <button className="nav-item active">Predicciones</button>
-                        <button onClick={() => navigate("/providers")} className="nav-item">Proveedores</button>
+                        <button onClick={() => navigate("/providers")} className="nav-item">
+                            Proveedores
+                        </button>
                     </nav>
                 </aside>
 
@@ -254,7 +260,7 @@ const Predictions = () => {
                             <h1>Predicciones de Demanda</h1>
                             <p>Análisis predictivo basado en IA para optimizar tu inventario</p>
                         </div>
-                        <button onClick={generateShoppingListPDF} className="btn-download-list">
+                        <button onClick={generateShoppingListPDF} className="btn-new-product">
                             <FiDownload size={18} /> Generar Lista de Compras
                         </button>
                     </header>
@@ -293,26 +299,17 @@ const Predictions = () => {
                             <ResponsiveContainer width="100%" height={400}>
                                 <BarChart data={predictionData}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                                    <XAxis
-                                        dataKey="day"
-                                        tick={{ fontSize: 12 }}
-                                        interval={2}
-                                    />
+                                    <XAxis dataKey="day" tick={{ fontSize: 12 }} interval={2} />
                                     <YAxis tick={{ fontSize: 12 }} />
                                     <Tooltip
                                         contentStyle={{
                                             background: "white",
                                             border: "1px solid #e2e8f0",
-                                            borderRadius: "8px"
+                                            borderRadius: "8px",
                                         }}
                                     />
                                     <Legend />
-                                    <Bar
-                                        dataKey="demanda"
-                                        fill="#6366f1"
-                                        radius={[8, 8, 0, 0]}
-                                        name="Demanda Estimada"
-                                    />
+                                    <Bar dataKey="demanda" fill="#6366f1" radius={[8, 8, 0, 0]} name="Demanda Estimada" />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
@@ -321,9 +318,7 @@ const Predictions = () => {
                     <div className="predictions-table-container">
                         <div className="table-header">
                             <h3>Todas las Predicciones</h3>
-                            <p className="subtitle">
-                                Análisis completo de {allPredictions.length} productos
-                            </p>
+                            <p className="subtitle">Análisis completo de {allPredictions.length} productos</p>
                         </div>
 
                         {allPredictions.length > 0 ? (
@@ -353,7 +348,9 @@ const Predictions = () => {
                                                     <strong>{p.predictedDemand}</strong>
                                                 </td>
                                                 <td className="text-center">
-                                                    <span className={`days-badge ${p.daysUntilStockout < 7 ? 'critical' : p.daysUntilStockout < 15 ? 'warning' : 'normal'}`}>
+                                                    <span
+                                                        className={`days-badge ${p.daysUntilStockout < 7 ? "critical" : p.daysUntilStockout < 15 ? "warning" : "normal"}`}
+                                                    >
                                                         {p.daysUntilStockout} días
                                                     </span>
                                                 </td>
@@ -361,9 +358,7 @@ const Predictions = () => {
                                                     <span className="order-badge">{p.recommendedOrder}</span>
                                                 </td>
                                                 <td className="text-center">
-                                                    <span className={`priority-badge ${getPriorityColor(p.priority)}`}>
-                                                        {p.priority}
-                                                    </span>
+                                                    <span className={`priority-badge ${getPriorityColor(p.priority)}`}>{p.priority}</span>
                                                 </td>
                                                 <td className="alert-cell">{p.alert}</td>
                                             </tr>

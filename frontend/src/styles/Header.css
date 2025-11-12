@@ -9,14 +9,31 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1400px;
+  max-width: 100%;
   margin: 0 auto;
+  padding-right: 20px;
 }
 
+/* User section now toggles visibility based on sidebar state */
 .user-section {
   display: flex;
   align-items: center;
   gap: 15px;
+  transition: all 0.3s ease;
+  opacity: 1;
+  width: auto;
+}
+
+.user-section.hidden {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.user-section.visible {
+  opacity: 1;
+  width: auto;
 }
 
 .avatar {
@@ -79,23 +96,74 @@
   border-color: rgba(0, 200, 255, 0.5);
 }
 
+/* New logout container - text hidden by default, appears on hover */
+.logout-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(255, 68, 68, 0.05);
+  border: 1px solid rgba(255, 68, 68, 0.2);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.logout-container:hover {
+  background: rgba(255, 68, 68, 0.1);
+  border-color: rgba(255, 68, 68, 0.4);
+  gap: 12px;
+  padding: 10px 16px;
+}
+
+/* Logout text hidden by default */
+.logout-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.logout-container:hover .logout-info {
+  opacity: 1;
+  width: auto;
+}
+
+.logout-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.logout-text {
+  color: #ff4444;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 /* Botón de logout */
 .logout-btn {
-  background: rgba(255, 68, 68, 0.1);
-  border: 1px solid rgba(255, 68, 68, 0.3);
+  background: rgba(255, 68, 68, 0.2);
+  border: 1px solid rgba(255, 68, 68, 0.4);
   color: #ff4444;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-radius: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
 .logout-btn:hover {
-  background: rgba(255, 68, 68, 0.2);
-  border-color: rgba(255, 68, 68, 0.5);
+  background: rgba(255, 68, 68, 0.3);
+  border-color: rgba(255, 68, 68, 0.6);
+  transform: scale(1.05);
 }
 
 .logout-btn svg {
@@ -114,6 +182,26 @@
 
   .header-actions {
     gap: 8px;
+  }
+
+  /* Mobile logout - text always hidden on small screens */
+  .logout-container {
+    flex-direction: row;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .logout-info {
+    display: none;
+  }
+
+  .logout-text {
+    font-size: 12px;
+  }
+
+  .logout-logo {
+    width: 28px;
+    height: 28px;
   }
 
   .theme-toggle,
