@@ -95,13 +95,19 @@ body {
 }
 
 /* Added styling for image logo - larger than other pages */
-.logo-image {
+.logo--image {
   width: 280px;
   height: auto;
   margin-bottom: 20px;
   object-fit: contain;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
   animation: slideDown 0.6s ease-out;
+}
+
+/* Added login-specific logo class to make it larger only on login page without affecting other pages */
+.logo-image-login {
+  width: 350px !important;
+  height: auto;
 }
 
 @keyframes slideDown {
@@ -352,6 +358,11 @@ body {
     width: 200px;
   }
 
+  /* Adjusted login logo size for tablets */
+  .logo-image-login {
+    width: 280px !important;
+  }
+
   .login-form {
     padding: 30px 25px;
   }
@@ -375,6 +386,11 @@ body {
   /* Further reduced logo size for mobile */
   .logo-image {
     width: 150px;
+  }
+
+  /* Adjusted login logo size for mobile */
+  .logo-image-login {
+    width: 200px !important;
   }
 
   .input-group input {

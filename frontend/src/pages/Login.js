@@ -91,8 +91,8 @@ const Login = () => {
             <div className="login-container-modern">
                 <div className="login-brand">
                     <div className="brand-content">
-                        <img src="/as.png" alt="Logo" className="logo-image" />
-                        <p>Sistema de Inventario y Gestion de Ventas con IA</p>
+                        <img src="/as.png" alt="Logo" className="logo--image" />
+                        <p>Sistema de Inventario y Ventas con IA</p>
                         <div className="brand-decoration">
                             <div className="circle"></div>
                             <div className="circle"></div>

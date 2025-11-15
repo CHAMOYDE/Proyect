@@ -44,11 +44,9 @@
   flex: 1;
 }
 
-.logo-image {
+.Logo-Image {
   width: 40px;
   height: 40px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #0096dc 0%, #00c8ff 100%);
 }
 
 .toggle-btn {
@@ -250,6 +248,61 @@
   border-color: #00ffff;
   color: #00ffff;
   transform: translateY(-1px);
+}
+
+/* Add modern search bar styling with cyan theme */
+.search-bar-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-bottom: 30px;
+  background-color: #141829;
+  border: 2px solid #0096dc;
+  border-radius: 12px;
+  padding: 0 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 150, 220, 0.1);
+}
+
+.search-bar-container:hover {
+  border-color: #00c8ff;
+  box-shadow: 0 4px 20px rgba(0, 200, 255, 0.2);
+}
+
+.search-bar-container:focus-within {
+  border-color: #00ffff;
+  box-shadow: 0 0 0 3px rgba(0, 200, 255, 0.2);
+}
+
+.search-icon {
+  color: #00c8ff;
+  margin-right: 12px;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.search-bar-container:hover .search-icon {
+  color: #00ffff;
+}
+
+.search-input-styled {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #e0e0e0;
+  font-size: 1rem;
+  padding: 14px 0;
+  outline: none;
+  font-family: inherit;
+}
+
+.search-input-styled::placeholder {
+  color: #718096;
+  transition: color 0.2s ease;
+}
+
+.search-input-styled:focus::placeholder {
+  color: #a0aec0;
 }
 
 /* TABLA */

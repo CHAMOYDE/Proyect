@@ -120,7 +120,7 @@ const Dashboard = () => {
         <aside className={`sidebar ${isCollapsed ? "closed" : "open"}`}>
           <div className="sidebar-header">
             <div className="logo-container">
-              <img src="/as.png" alt="Logo" className="logo-image" />
+              <img src="/as.png" alt="Logo" className="Logo-image" />
             </div>
             <button className="toggle-btn" onClick={toggleSidebar}>
               {isCollapsed ? <FiChevronLeft size={22} /> : <FiMenu size={22} />}
@@ -142,12 +142,6 @@ const Dashboard = () => {
               Proveedores
             </button>
           </nav>
-
-          <div className="sidebar-footer">
-            <select className="user-select">
-              <option>{user?.nombre || user?.rol || "Usuario"}</option>
-            </select>
-          </div>
         </aside>
 
         <div className={`content-area ${isCollapsed ? "collapsed" : ""}`}>

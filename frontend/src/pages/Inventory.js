@@ -6,6 +6,7 @@ import { inventoryService } from "../services/api"
 import { useNavigate } from "react-router-dom"
 import { FiMenu, FiChevronLeft, FiSearch, FiEdit, FiTrash2, FiPlus } from "react-icons/fi"
 import Header from "../components/Header"
+import ConfirmModal from "../components/ConfirmModal"
 import "./Inventory.css"
 
 const Inventory = () => {
@@ -30,6 +31,9 @@ const Inventory = () => {
     supplier: "",
   })
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showEditConfirm, setShowEditConfirm] = useState(false)
+  const [confirmingProduct, setConfirmingProduct] = useState(null)
 
   // Prefijos de SKU por categoría
   const skuPrefixes = {
@@ -88,15 +92,8 @@ const Inventory = () => {
 
   const openModal = (product = null) => {
     if (product) {
-      setEditingProduct(product)
-      setFormData({
-        name: product.name,
-        category: product.category || "",
-        stock: product.stock,
-        minStock: product.minStock,
-        price: product.price,
-        supplier: product.supplier || "",
-      })
+      setConfirmingProduct(product)
+      setShowEditConfirm(true)
     } else {
       setEditingProduct(null)
       setFormData({
@@ -107,8 +104,8 @@ const Inventory = () => {
         price: "",
         supplier: "",
       })
+      setShowModal(true)
     }
-    setShowModal(true)
   }
 
   const closeModal = () => {
@@ -137,14 +134,32 @@ const Inventory = () => {
   }
 
   const handleDelete = async (id) => {
-    if (window.confirm("¿Eliminar este producto?")) {
-      try {
-        await inventoryService.deleteProduct(id)
-        loadProducts()
-      } catch (error) {
-        alert("Error al eliminar")
-      }
+    setConfirmingProduct({ id })
+    setShowDeleteConfirm(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    try {
+      await inventoryService.deleteProduct(confirmingProduct.id)
+      loadProducts()
+      setShowDeleteConfirm(false)
+    } catch (error) {
+      alert("Error al eliminar")
     }
+  }
+
+  const handleConfirmEdit = () => {
+    setShowEditConfirm(false)
+    setEditingProduct(confirmingProduct)
+    setFormData({
+      name: confirmingProduct.name,
+      category: confirmingProduct.category || "",
+      stock: confirmingProduct.stock,
+      minStock: confirmingProduct.minStock,
+      price: confirmingProduct.price,
+      supplier: confirmingProduct.supplier || "",
+    })
+    setShowModal(true)
   }
 
   const addNewCategory = () => {
@@ -169,7 +184,7 @@ const Inventory = () => {
         <aside className={`sidebar ${isCollapsed ? "closed" : "open"}`}>
           <div className="sidebar-header">
             <div className="logo-container">
-              <img src="/as.png" alt="Logo" className="logo-image" />
+              <img src="/as.png" alt="Logo" className="Logo-Image" />
             </div>
             <button className="toggle-btn" onClick={toggleSidebar}>
               {isCollapsed ? <FiChevronLeft size={22} /> : <FiMenu size={22} />}
@@ -191,12 +206,6 @@ const Inventory = () => {
               Proveedores
             </button>
           </nav>
-
-          <div className="sidebar-footer">
-            <select className="user-select">
-              <option>{user?.nombre || user?.rol || "Usuario"}</option>
-            </select>
-          </div>
         </aside>
 
         <div className={`content-area ${isCollapsed ? "collapsed" : ""}`}>
@@ -213,7 +222,7 @@ const Inventory = () => {
             <input
               type="text"
               className="search-input-styled"
-              placeholder="Buscar por nombre o SKU..."
+              placeholder="       Buscar por nombre o SKU..."
               value={searchTerm}
               onChange={handleSearch}
             />
@@ -247,10 +256,10 @@ const Inventory = () => {
                   <td className="price-cell">S/ {Number.parseFloat(p.price).toFixed(2)}</td>
                   <td>{p.supplier || "N/A"}</td>
                   <td className="actions-cell">
-                    <button onClick={() => openModal(p)} className="btn-edit">
+                    <button onClick={() => openModal(p)} className="btn-edit" title="Editar producto">
                       <FiEdit size={16} />
                     </button>
-                    <button onClick={() => handleDelete(p.id)} className="btn-delete">
+                    <button onClick={() => handleDelete(p.id)} className="btn-delete" title="Eliminar producto">
                       <FiTrash2 size={16} />
                     </button>
                   </td>
@@ -385,6 +394,26 @@ const Inventory = () => {
           )}
         </div>
       </div>
+      {/* Confirmation Modals */}
+      <ConfirmModal
+        isOpen={showEditConfirm}
+        title="Editar Producto"
+        message="¿Deseas editar este producto?"
+        onConfirm={handleConfirmEdit}
+        onCancel={() => setShowEditConfirm(false)}
+        confirmText="Editar"
+        cancelText="Cancelar"
+      />
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        title="Eliminar Producto"
+        message="¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer."
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        isDangerous={true}
+      />
     </>
   )
 }

@@ -48,8 +48,6 @@
 .logo-image {
   width: 40px;
   height: 40px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #0096dc 0%, #00c8ff 100%);
 }
 
 .logo-text {
@@ -625,9 +623,43 @@
   padding: 16px 20px;
 }
 
+/* Add styles for edit and delete sale buttons */
+.btn-edit-sale,
+.btn-delete-sale {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-edit-sale {
+  color: #00c8ff;
+}
+
+.btn-edit-sale:hover {
+  background-color: rgba(0, 200, 255, 0.2);
+  color: #00ffff;
+}
+
+.btn-delete-sale {
+  color: #f56565;
+}
+
+.btn-delete-sale:hover {
+  background-color: rgba(245, 101, 101, 0.2);
+  color: #fc8181;
+}
+
+/* Add styles for history item actions */
 .history-item {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 12px 0;
   border-bottom: 1px dashed #2d3748;
   font-size: 0.95rem;
@@ -647,6 +679,12 @@
   font-weight: 500;
 }
 
+.history-details {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .date {
   color: #718096;
   font-size: 0.9rem;
@@ -655,7 +693,12 @@
 .total {
   color: #6ee7b7;
   font-weight: 600;
-  margin-left: 12px;
+}
+
+.history-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .no-sales {

@@ -4,10 +4,11 @@ import { useEffect, useState } from "react"
 import { useAuth } from "../context/AuthContext"
 import { salesService, inventoryService } from "../services/api"
 import { useNavigate } from "react-router-dom"
-import jsPDF from "jspdf";
-import "jspdf-autotable";
-import { FiMenu, FiChevronLeft, FiDownload, FiChevronDown, FiChevronUp } from "react-icons/fi"
+import { jsPDF } from "jspdf"
+import "jspdf-autotable"
+import { FiMenu, FiChevronLeft, FiDownload, FiChevronDown, FiChevronUp, FiEdit, FiTrash2 } from "react-icons/fi"
 import Header from "../components/Header"
+import ConfirmModal from "../components/ConfirmModal"
 import "./Sales.css"
 
 const Sales = () => {
@@ -29,6 +30,11 @@ const Sales = () => {
         isSeason: false,
     })
     const [isCollapsed, setIsCollapsed] = useState(false)
+    const [showEditModal, setShowEditModal] = useState(false)
+    const [editingSale, setEditingSale] = useState(null)
+    const [showEditSaleConfirm, setShowEditSaleConfirm] = useState(false)
+    const [showDeleteSaleConfirm, setShowDeleteSaleConfirm] = useState(false)
+    const [confirmingSale, setConfirmingSale] = useState(null)
 
     useEffect(() => {
         loadData()
@@ -246,6 +252,32 @@ const Sales = () => {
         }
     }
 
+    const handleEditSale = (sale) => {
+        setConfirmingSale(sale)
+        setShowEditSaleConfirm(true)
+    }
+
+    const handleConfirmEditSale = () => {
+        setEditingSale(confirmingSale)
+        setShowEditModal(true)
+        setShowEditSaleConfirm(false)
+    }
+
+    const handleDeleteSale = async (saleId) => {
+        setConfirmingSale({ id: saleId })
+        setShowDeleteSaleConfirm(true)
+    }
+
+    const handleConfirmDeleteSale = async () => {
+        try {
+            await salesService.deleteSale(confirmingSale.id)
+            loadData()
+            setShowDeleteSaleConfirm(false)
+        } catch (error) {
+            alert("Error al eliminar la venta")
+        }
+    }
+
     return (
         <>
             <Header isCollapsed={isCollapsed} />
@@ -345,6 +377,18 @@ const Sales = () => {
                                                 <span className="date">{new Date(sale.date).toLocaleDateString("es-PE")}</span>
                                                 <span className="total">S/ {sale.totalPrice.toFixed(2)}</span>
                                             </div>
+                                            <div className="history-actions">
+                                                <button onClick={() => handleEditSale(sale)} className="btn-edit-sale" title="Editar venta">
+                                                    <FiEdit size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteSale(sale.id)}
+                                                    className="btn-delete-sale"
+                                                    title="Eliminar venta"
+                                                >
+                                                    <FiTrash2 size={16} />
+                                                </button>
+                                            </div>
                                         </div>
                                     )
                                 })
@@ -365,12 +409,13 @@ const Sales = () => {
                                         <th>Descuento</th>
                                         <th>Total</th>
                                         <th>Método Pago</th>
+                                        <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {sales.length === 0 ? (
                                         <tr>
-                                            <td colSpan="7" className="no-data">
+                                            <td colSpan="8" className="no-data">
                                                 No hay ventas registradas
                                             </td>
                                         </tr>
@@ -387,6 +432,18 @@ const Sales = () => {
                                                     <td className="total-amount">S/ {sale.totalPrice.toFixed(2)}</td>
                                                     <td>
                                                         <span className="payment-badge">{sale.paymentMethod || "Efectivo"}</span>
+                                                    </td>
+                                                    <td className="actions-cell">
+                                                        <button onClick={() => handleEditSale(sale)} className="btn-edit-sale" title="Editar venta">
+                                                            <FiEdit size={16} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteSale(sale.id)}
+                                                            className="btn-delete-sale"
+                                                            title="Eliminar venta"
+                                                        >
+                                                            <FiTrash2 size={16} />
+                                                        </button>
                                                     </td>
                                                 </tr>
                                             )
@@ -504,6 +561,25 @@ const Sales = () => {
                     </div>
                 )}
             </div>
+            <ConfirmModal
+                isOpen={showEditSaleConfirm}
+                title="Editar Venta"
+                message="¿Deseas editar esta venta?"
+                onConfirm={handleConfirmEditSale}
+                onCancel={() => setShowEditSaleConfirm(false)}
+                confirmText="Editar"
+                cancelText="Cancelar"
+            />
+            <ConfirmModal
+                isOpen={showDeleteSaleConfirm}
+                title="Eliminar Venta"
+                message="¿Estás seguro de que deseas eliminar esta venta? Esta acción no se puede deshacer."
+                onConfirm={handleConfirmDeleteSale}
+                onCancel={() => setShowDeleteSaleConfirm(false)}
+                confirmText="Eliminar"
+                cancelText="Cancelar"
+                isDangerous={true}
+            />
         </>
     )
 }
