@@ -173,15 +173,6 @@ const Login = () => {
                                 )}
                             </button>
                         </form>
-
-                        <div className="login-footer">
-                            <p>
-                                <strong>Usuario:</strong> admin@dyr.com
-                            </p>
-                            <p>
-                                <strong>Contraseña:</strong> Admin123!
-                            </p>
-                        </div>
                     </div>
                 </div>
             </div>

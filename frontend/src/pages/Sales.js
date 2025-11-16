@@ -35,6 +35,11 @@ const Sales = () => {
     const [showEditSaleConfirm, setShowEditSaleConfirm] = useState(false)
     const [showDeleteSaleConfirm, setShowDeleteSaleConfirm] = useState(false)
     const [confirmingSale, setConfirmingSale] = useState(null)
+    const [editFormData, setEditFormData] = useState({
+        quantity: "",
+        discount: "0",
+        paymentMethod: "efectivo",
+    })
 
     useEffect(() => {
         loadData()
@@ -258,8 +263,7 @@ const Sales = () => {
     }
 
     const handleConfirmEditSale = () => {
-        setEditingSale(confirmingSale)
-        setShowEditModal(true)
+        openEditModal(confirmingSale)
         setShowEditSaleConfirm(false)
     }
 
@@ -278,6 +282,45 @@ const Sales = () => {
         }
     }
 
+    const openEditModal = (sale) => {
+        setEditFormData({
+            quantity: sale.quantity,
+            discount: sale.discount || "0",
+            paymentMethod: sale.paymentMethod || "efectivo",
+        })
+        setEditingSale(sale)
+        setShowEditModal(true)
+    }
+
+    const closeEditModal = () => {
+        setShowEditModal(false)
+        setEditingSale(null)
+    }
+
+    const handleEditFormChange = (e) => {
+        const { name, value } = e.target
+        setEditFormData({
+            ...editFormData,
+            [name]: value,
+        })
+    }
+
+    const handleSubmitEditSale = async (e) => {
+        e.preventDefault()
+        try {
+            await salesService.updateSale(editingSale.id, {
+                quantity: Number.parseInt(editFormData.quantity),
+                discount: Number.parseFloat(editFormData.discount),
+                paymentMethod: editFormData.paymentMethod,
+            })
+            loadData()
+            closeEditModal()
+            alert("Venta actualizada exitosamente.")
+        } catch (error) {
+            alert(error.response?.data?.message || "Error al actualizar la venta")
+        }
+    }
+
     return (
         <>
             <Header isCollapsed={isCollapsed} />
@@ -285,7 +328,7 @@ const Sales = () => {
                 <aside className={`sidebar ${isCollapsed ? "closed" : "open"}`}>
                     <div className="sidebar-header">
                         <div className="logo-container">
-                            <img src="/as.png" alt="Logo" className="logo-image" />
+                            <img src="/as.png" alt="Logo" className="logo--image" />
                         </div>
                         <button className="toggle-btn" onClick={toggleSidebar}>
                             {isCollapsed ? <FiChevronLeft size={22} /> : <FiMenu size={22} />}
@@ -361,33 +404,39 @@ const Sales = () => {
                         <div className="history-header">
                             <h3>Últimas 5 Ventas</h3>
                         </div>
-                        <div className="history-list">
+                        <div className="sales-cards">
                             {last5Sales.length === 0 ? (
                                 <p className="no-sales">No hay ventas registradas</p>
                             ) : (
                                 last5Sales.map((sale) => {
                                     const product = getProductById(sale.productId)
                                     return (
-                                        <div key={sale.id} className="history-item">
-                                            <div className="history-product">
-                                                <strong>{product?.nombre || sale.productName || "N/A"}</strong>
-                                                <span className="quantity">x{sale.quantity}</span>
+                                        <div key={sale.id} className="sale-card">
+                                            <div className="card-header">
+                                                <strong className="product-name">{product?.nombre || sale.productName || "N/A"}</strong>
+                                                <span className="card-quantity">x{sale.quantity}</span>
                                             </div>
-                                            <div className="history-details">
-                                                <span className="date">{new Date(sale.date).toLocaleDateString("es-PE")}</span>
-                                                <span className="total">S/ {sale.totalPrice.toFixed(2)}</span>
+                                            <div className="card-body">
+                                                <div className="card-row">
+                                                    <span className="label">Fecha:</span>
+                                                    <span className="value">{new Date(sale.date).toLocaleDateString("es-PE")}</span>
+                                                </div>
+                                                <div className="card-row">
+                                                    <span className="label">Precio Unit.:</span>
+                                                    <span className="value">S/ {(sale.totalPrice / sale.quantity).toFixed(2)}</span>
+                                                </div>
+                                                <div className="card-row">
+                                                    <span className="label">Descuento:</span>
+                                                    <span className="value">{sale.discount ? `${sale.discount}%` : "0%"}</span>
+                                                </div>
+                                                <div className="card-row">
+                                                    <span className="label">Método Pago:</span>
+                                                    <span className="value payment-badge">{sale.paymentMethod || "Efectivo"}</span>
+                                                </div>
                                             </div>
-                                            <div className="history-actions">
-                                                <button onClick={() => handleEditSale(sale)} className="btn-edit-sale" title="Editar venta">
-                                                    <FiEdit size={16} />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDeleteSale(sale.id)}
-                                                    className="btn-delete-sale"
-                                                    title="Eliminar venta"
-                                                >
-                                                    <FiTrash2 size={16} />
-                                                </button>
+                                            <div className="card-footer">
+                                                <span className="total-label">Total:</span>
+                                                <span className="total-amount">S/ {sale.totalPrice.toFixed(2)}</span>
                                             </div>
                                         </div>
                                     )
@@ -554,6 +603,112 @@ const Sales = () => {
                                     </button>
                                     <button type="submit" className="btn-submit">
                                         Registrar Venta
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {showEditModal && editingSale && (
+                    <div className="modal-overlay" onClick={closeEditModal}>
+                        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                            <h3>Editar Venta</h3>
+                            <form onSubmit={handleSubmitEditSale}>
+                                <div className="form-group">
+                                    <label>Producto</label>
+                                    <input
+                                        type="text"
+                                        value={getProductById(editingSale.productId)?.nombre || "N/A"}
+                                        disabled
+                                        className="form-input-disabled"
+                                    />
+                                </div>
+
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>Cantidad *</label>
+                                        <input
+                                            type="number"
+                                            name="quantity"
+                                            value={editFormData.quantity}
+                                            onChange={handleEditFormChange}
+                                            min="1"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Descuento (%)</label>
+                                        <input
+                                            type="number"
+                                            name="discount"
+                                            value={editFormData.discount}
+                                            onChange={handleEditFormChange}
+                                            min="0"
+                                            max="100"
+                                            step="0.01"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Método de Pago</label>
+                                    <select name="paymentMethod" value={editFormData.paymentMethod} onChange={handleEditFormChange}>
+                                        <option value="efectivo">Efectivo</option>
+                                        <option value="tarjeta">Tarjeta</option>
+                                        <option value="transferencia">Transferencia</option>
+                                        <option value="yape">Yape/Plin</option>
+                                    </select>
+                                </div>
+
+                                {editingSale && (
+                                    <div className="sale-summary">
+                                        <div className="summary-row">
+                                            <span>Subtotal:</span>
+                                            <span>
+                                                S/{" "}
+                                                {(
+                                                    (getProductById(editingSale.productId)?.price || 0) * editFormData.quantity
+                                                ).toFixed(2)}
+                                            </span>
+                                        </div>
+                                        {editFormData.discount > 0 && (
+                                            <div className="summary-row discount">
+                                                <span>Descuento ({editFormData.discount}%):</span>
+                                                <span>
+                                                    - S/{" "}
+                                                    {(
+                                                        ((getProductById(editingSale.productId)?.price || 0) *
+                                                            editFormData.quantity *
+                                                            Number.parseFloat(editFormData.discount)) /
+                                                        100
+                                                    ).toFixed(2)}
+                                                </span>
+                                            </div>
+                                        )}
+                                        <div className="summary-row total">
+                                            <strong>Total:</strong>
+                                            <strong>
+                                                S/{" "}
+                                                {(
+                                                    (getProductById(editingSale.productId)?.price || 0) * editFormData.quantity -
+                                                    ((getProductById(editingSale.productId)?.price || 0) *
+                                                        editFormData.quantity *
+                                                        Number.parseFloat(editFormData.discount)) /
+                                                    100
+                                                ).toFixed(2)}
+                                            </strong>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="modal-actions">
+                                    <button type="button" onClick={closeEditModal} className="btn-cancel">
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" className="btn-submit">
+                                        Guardar Cambios
                                     </button>
                                 </div>
                             </form>

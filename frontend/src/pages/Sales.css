@@ -45,7 +45,7 @@
   flex: 1;
 }
 
-.logo-image {
+.logo--image {
   width: 40px;
   height: 40px;
 }
@@ -255,6 +255,111 @@
   border-color: #00ffff;
   color: #00ffff;
   transform: translateY(-1px);
+}
+
+/* Added card layout styles for recent sales */
+.sales-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  padding: 16px 20px;
+}
+
+.sale-card {
+  background: linear-gradient(135deg, #0d1535 0%, #141829 100%);
+  border: 1px solid rgba(0, 150, 220, 0.3);
+  border-radius: 10px;
+  padding: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sale-card:hover {
+  border-color: rgba(0, 200, 255, 0.6);
+  background: linear-gradient(135deg, #0f1939 0%, #1a1f3a 100%);
+  box-shadow: 0 8px 20px rgba(0, 150, 220, 0.2);
+  transform: translateY(-2px);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(0, 150, 220, 0.2);
+}
+
+.product-name {
+  color: #00ffff;
+  font-size: 1rem;
+  font-weight: 600;
+  flex: 1;
+}
+
+.card-quantity {
+  color: #a0aec0;
+  background: rgba(0, 150, 220, 0.2);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.card-body {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.card-row .label {
+  color: #a0aec0;
+  font-weight: 500;
+}
+
+.card-row .value {
+  color: #cbd5e0;
+  text-align: right;
+  font-weight: 500;
+}
+
+.payment-badge {
+  background: rgba(52, 211, 153, 0.2);
+  color: #6ee7b7;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0, 150, 220, 0.2);
+  background: rgba(0, 150, 220, 0.1);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.total-label {
+  color: #a0aec0;
+  font-weight: 600;
+}
+
+.total-amount {
+  color: #00ffff;
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
 /* TABLA */
@@ -578,6 +683,9 @@
   }
   .action-buttons {
     justify-content: center;
+  }
+  .sales-cards {
+    grid-template-columns: 1fr;
   }
 }
 
