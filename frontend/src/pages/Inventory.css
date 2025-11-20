@@ -274,15 +274,25 @@
   box-shadow: 0 0 0 3px rgba(0, 200, 255, 0.2);
 }
 
-.search-icon {
-  color: #00c8ff;
+/* Scoped search-icon to container and reset positioning to fix overlap */
+.search-bar-container .search-icon {
+  position: static;
+  transform: none;
   margin-right: 12px;
+  color: #00c8ff;
   flex-shrink: 0;
   transition: color 0.2s ease;
 }
 
 .search-bar-container:hover .search-icon {
   color: #00ffff;
+}
+
+.search-icon {
+  color: #00c8ff;
+  margin-right: 12px;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
 }
 
 .search-input-styled {

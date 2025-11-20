@@ -1,6 +1,8 @@
+"use client"
+
 import { useEffect, useState } from "react"
 import { useAuth } from "../context/AuthContext"
-import { inventoryService } from "../services/api"
+import { inventoryService, providersService } from "../services/api"
 import { useNavigate } from "react-router-dom"
 import { FiMenu, FiChevronLeft, FiSearch, FiEdit, FiTrash2, FiPlus } from "react-icons/fi"
 import Header from "../components/Header"
@@ -14,6 +16,7 @@ const Inventory = () => {
   const [products, setProducts] = useState([])
   const [filteredProducts, setFilteredProducts] = useState([])
   const [categories, setCategories] = useState([])
+  const [providers, setProviders] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [showModal, setShowModal] = useState(false)
@@ -43,6 +46,7 @@ const Inventory = () => {
 
   useEffect(() => {
     loadProducts()
+    loadProviders()
   }, [])
 
   const loadProducts = async () => {
@@ -70,6 +74,17 @@ const Inventory = () => {
     } catch (error) {
       alert("Error al cargar productos")
       setLoading(false)
+    }
+  }
+
+  const loadProviders = async () => {
+    try {
+      const res = await providersService.getProviders()
+      if (res.data.success) {
+        setProviders(res.data.providers)
+      }
+    } catch (error) {
+      console.error("Error al cargar proveedores:", error)
     }
   }
 
@@ -220,7 +235,7 @@ const Inventory = () => {
             <input
               type="text"
               className="search-input-styled"
-              placeholder="       Buscar por nombre o SKU..."
+              placeholder="Buscar por nombre o SKU..."
               value={searchTerm}
               onChange={handleSearch}
             />
@@ -338,11 +353,18 @@ const Inventory = () => {
 
                   <div className="form-group">
                     <label>Proveedor</label>
-                    <input
-                      type="text"
+                    <select
                       value={formData.supplier}
                       onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
-                    />
+                      className="form-select"
+                    >
+                      <option value="">Seleccionar proveedor</option>
+                      {providers.map((provider) => (
+                        <option key={provider.id} value={provider.nombre}>
+                          {provider.nombre}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   {!editingProduct && (
