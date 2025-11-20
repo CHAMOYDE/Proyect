@@ -557,3 +557,210 @@
   background: #141829;
   border-bottom: 1px solid rgba(0, 200, 255, 0.2);
 }
+
+/* New styles for improved chart visualization and controls */
+
+.prediction-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.metric-card {
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.1) 0%,
+    rgba(99, 102, 241, 0.05) 100%
+  );
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+  border-color: rgba(99, 102, 241, 0.6);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+  transform: translateY(-2px);
+}
+
+.metric-card.metric-days .metric-value.days-critical {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.metric-card.metric-days .metric-value.days-warning {
+  color: #f59e0b;
+  font-weight: 700;
+}
+
+.metric-card.metric-days .metric-value.days-normal {
+  color: #10b981;
+  font-weight: 700;
+}
+
+.metric-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.metric-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #6366f1;
+}
+
+/* Enhanced prediction chart card */
+.prediction-chart-card {
+  background: #141829;
+  border: 1px solid #1f2942;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 15px rgba(0, 150, 220, 0.1);
+  transition: all 0.3s ease;
+}
+
+.prediction-chart-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 150, 220, 0.15);
+  border-color: #00c8ff;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1;
+  min-width: 250px;
+}
+
+.header-left svg {
+  color: #6366f1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.header-left h3 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #00ffff;
+}
+
+.chart-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: #a0aec0;
+}
+
+.chart-controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.control-buttons {
+  display: flex;
+  gap: 8px;
+  background: #1a202c;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.period-btn,
+.chart-type-btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  background: #1f2942;
+  color: #a0aec0;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 44px;
+}
+
+.period-btn:hover,
+.chart-type-btn:hover {
+  background: #2d3748;
+  color: #00c8ff;
+}
+
+.period-btn.active,
+.chart-type-btn.active {
+  background: linear-gradient(135deg, #0096dc 0%, #00c8ff 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 150, 220, 0.3);
+}
+
+.chart-type-btn {
+  padding: 8px 10px;
+  min-width: 40px;
+}
+
+/* Responsive chart adjustments */
+@media (max-width: 1024px) {
+  .chart-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-left {
+    width: 100%;
+  }
+
+  .chart-controls {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .prediction-metrics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .metric-card {
+    padding: 12px;
+  }
+
+  .metric-value {
+    font-size: 20px;
+  }
+
+  .prediction-chart-card {
+    padding: 16px;
+  }
+
+  .control-buttons {
+    flex-direction: column;
+  }
+
+  .period-btn,
+  .chart-type-btn {
+    width: 100%;
+  }
+}

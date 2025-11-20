@@ -132,8 +132,7 @@ const Sales = () => {
             })
         }
 
-        // Header con fondo degradado
-        doc.setFillColor(99, 102, 241)
+        doc.setFillColor(0, 150, 220)
         doc.rect(0, 0, pageWidth, 50, "F")
 
         // Logo
@@ -203,7 +202,7 @@ const Sales = () => {
             body: tableData,
             theme: "grid",
             headStyles: {
-                fillColor: [99, 102, 241],
+                fillColor: [0, 150, 220],
                 textColor: 255,
                 fontSize: 10,
                 fontStyle: "bold",
@@ -667,10 +666,7 @@ const Sales = () => {
                                         <div className="summary-row">
                                             <span>Subtotal:</span>
                                             <span>
-                                                S/{" "}
-                                                {(
-                                                    (getProductById(editingSale.productId)?.price || 0) * editFormData.quantity
-                                                ).toFixed(2)}
+                                                S/ {((getProductById(editingSale.productId)?.price || 0) * editFormData.quantity).toFixed(2)}
                                             </span>
                                         </div>
                                         {editFormData.discount > 0 && (

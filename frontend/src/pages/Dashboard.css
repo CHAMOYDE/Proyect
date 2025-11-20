@@ -380,6 +380,29 @@
 .recharts-tooltip-wrapper {
   outline: none;
 }
+
+/* Estilos para el CustomTooltip con símbolo de soles */
+.custom-tooltip {
+  background: rgba(26, 31, 58, 0.95);
+  border: 1px solid rgba(0, 150, 220, 0.5);
+  border-radius: 6px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.custom-tooltip .label {
+  color: #b0b0b0;
+  font-size: 12px;
+  margin: 0 0 4px 0;
+  text-transform: capitalize;
+}
+
+.custom-tooltip .value {
+  color: #0096dc;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+}
 /* Table styles */
 .table {
   width: 100%;

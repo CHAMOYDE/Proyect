@@ -5,9 +5,22 @@ import { useAuth } from "../context/AuthContext"
 import { predictionsService } from "../services/api"
 import { useNavigate } from "react-router-dom"
 import { jsPDF } from "jspdf"
-import "jspdf-autotable"
-import { FiMenu, FiChevronLeft, FiDownload, FiAlertTriangle, FiTrendingUp } from "react-icons/fi"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts"
+import autoTable from "jspdf-autotable"
+import { FiMenu, FiChevronLeft, FiDownload, FiAlertTriangle, FiTrendingUp, FiBarChart2 } from "react-icons/fi"
+import {
+    BarChart,
+    Bar,
+    LineChart,
+    Line,
+    AreaChart,
+    Area,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    Legend,
+} from "recharts"
 import Header from "../components/Header"
 import "./Predictions.css"
 
@@ -22,6 +35,12 @@ const Predictions = () => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [isCollapsed, setIsCollapsed] = useState(false)
+    const [chartType, setChartType] = useState("bar")
+    const [selectedPeriod, setSelectedPeriod] = useState(30)
+    const [selectedProductInfo, setSelectedProductInfo] = useState(null)
+
+    // Alias para el icono de "line chart" (FiLineChart no existe en react-icons/fi)
+    const FiLineChartIcon = FiTrendingUp
 
     useEffect(() => {
         loadProducts()
@@ -48,7 +67,7 @@ const Predictions = () => {
             console.log("Predicciones cargadas:", res.data)
             setAllPredictions(res.data.predictions || [])
             if (res.data.predictions?.length > 0) {
-                setError(null) // Limpiar error si se cargó correctamente
+                setError(null)
             }
         } catch (err) {
             console.error("Error cargando predicciones:", err)
@@ -61,6 +80,7 @@ const Predictions = () => {
         if (!productId) {
             setPredictionData([])
             setSelectedProduct(null)
+            setSelectedProductInfo(null)
             return
         }
 
@@ -69,26 +89,57 @@ const Predictions = () => {
         setError(null)
 
         try {
-            const res = await predictionsService.getPredictions(productId, 30)
+            const res = await predictionsService.getPredictions(productId, selectedPeriod)
             const pred = res.data.prediction[0]
 
             if (!pred) {
                 setPredictionData([])
+                setSelectedProductInfo(null)
                 return
             }
 
-            // Generar datos para el gráfico
-            const chartData = Array.from({ length: 30 }, (_, idx) => ({
-                day: `Día ${idx + 1}`,
-                demanda: Math.round(pred.avgDailySales * (1 + (Math.random() - 0.5) * 0.3)),
-            }))
+            const avgDailySales = pred.avgDailySales || 0
+            const variance = avgDailySales * 0.2 // 20% variance for realistic prediction
+
+            const chartData = Array.from({ length: selectedPeriod }, (_, idx) => {
+                // Generate data with slight realistic variation
+                const baseForecast = avgDailySales
+                const upper = baseForecast + variance
+                const lower = Math.max(0, baseForecast - variance)
+                const actual = baseForecast + (Math.random() - 0.5) * variance * 0.8
+
+                return {
+                    day: idx + 1,
+                    fecha: `Día ${idx + 1}`,
+                    demand: Math.round(actual),
+                    forecast: Math.round(baseForecast),
+                    upper: Math.round(upper),
+                    lower: Math.round(lower),
+                }
+            })
 
             setPredictionData(chartData)
+            setSelectedProductInfo({
+                productName: pred.productName,
+                currentStock: pred.currentStock,
+                avgDailySales: pred.avgDailySales,
+                predictedDemand: pred.predictedDemand,
+                daysUntilStockout: pred.daysUntilStockout,
+                recommendedOrder: pred.recommendedOrder,
+                priority: pred.priority,
+            })
         } catch (err) {
             console.error("Error obteniendo predicción:", err)
             setError("No se pudo obtener la predicción")
         } finally {
             setLoading(false)
+        }
+    }
+
+    const handlePeriodChange = (newPeriod) => {
+        setSelectedPeriod(newPeriod)
+        if (selectedProduct) {
+            handleSelectProduct(selectedProduct)
         }
     }
 
@@ -109,13 +160,127 @@ const Predictions = () => {
         }
     }
 
+    const renderChart = () => {
+        const commonProps = {
+            width: "100%",
+            height: 450,
+            data: predictionData,
+            margin: { top: 10, right: 30, left: 0, bottom: 10 },
+        }
+
+        const chartConfig = (
+            <>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={true} />
+                <XAxis
+                    dataKey="fecha"
+                    tick={{ fontSize: 12, fill: "#64748b" }}
+                    interval={Math.max(0, Math.floor(selectedPeriod / 8))}
+                    angle={selectedPeriod > 14 ? -45 : 0}
+                    height={selectedPeriod > 14 ? 80 : 40}
+                />
+                <YAxis
+                    tick={{ fontSize: 12, fill: "#64748b" }}
+                    label={{ value: "Unidades", angle: -90, position: "insideLeft", style: { fill: "#64748b" } }}
+                />
+                <Tooltip
+                    contentStyle={{
+                        background: "#ffffff",
+                        border: "2px solid #6366f1",
+                        borderRadius: "8px",
+                        padding: "12px",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                    }}
+                    labelStyle={{ color: "#1e293b" }}
+                    cursor={{ fill: "rgba(99, 102, 241, 0.1)" }}
+                />
+                <Legend wrapperStyle={{ paddingTop: "20px" }} iconType="line" />
+            </>
+        )
+
+        switch (chartType) {
+            case "line":
+                return (
+                    <ResponsiveContainer width={commonProps.width} height={commonProps.height}>
+                        <LineChart data={predictionData} margin={commonProps.margin}>
+                            {chartConfig}
+                            <Line
+                                type="monotone"
+                                dataKey="forecast"
+                                stroke="#6366f1"
+                                strokeWidth={3}
+                                dot={{ fill: "#6366f1", r: 4 }}
+                                activeDot={{ r: 6 }}
+                                name="Demanda Predicha"
+                                isAnimationActive={true}
+                            />
+                            <Line
+                                type="monotone"
+                                dataKey="demand"
+                                stroke="#0ea5e9"
+                                strokeWidth={2}
+                                strokeDasharray="5 5"
+                                name="Demanda Real (Estimada)"
+                                dot={false}
+                            />
+                        </LineChart>
+                    </ResponsiveContainer>
+                )
+            case "area":
+                return (
+                    <ResponsiveContainer width={commonProps.width} height={commonProps.height}>
+                        <AreaChart data={predictionData} margin={commonProps.margin}>
+                            {chartConfig}
+                            <Area
+                                type="monotone"
+                                dataKey="upper"
+                                stroke="none"
+                                fill="rgba(99, 102, 241, 0.1)"
+                                name="Límite Superior (Optimista)"
+                            />
+                            <Area
+                                type="monotone"
+                                dataKey="forecast"
+                                stroke="#6366f1"
+                                fill="rgba(99, 102, 241, 0.3)"
+                                strokeWidth={2}
+                                name="Pronóstico Base"
+                                isAnimationActive={true}
+                            />
+                            <Area
+                                type="monotone"
+                                dataKey="lower"
+                                stroke="none"
+                                fill="rgba(99, 102, 241, 0.05)"
+                                name="Límite Inferior (Pesimista)"
+                            />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                )
+            default:
+                return (
+                    <ResponsiveContainer width={commonProps.width} height={commonProps.height}>
+                        <BarChart data={predictionData} margin={commonProps.margin}>
+                            {chartConfig}
+                            <Bar
+                                dataKey="forecast"
+                                fill="#6366f1"
+                                radius={[8, 8, 0, 0]}
+                                name="Demanda Predicha"
+                                isAnimationActive={true}
+                            />
+                            <Bar dataKey="demand" fill="#0ea5e9" radius={[8, 8, 0, 0]} opacity={0.6} name="Demanda Real (Estimada)" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                )
+        }
+    }
+
     const generateShoppingListPDF = () => {
         const doc = new jsPDF()
         const pageWidth = doc.internal.pageSize.getWidth()
         const pageHeight = doc.internal.pageSize.getHeight()
 
-        // Header
-        doc.setFillColor(99, 102, 241)
+        doc.setFillColor(0, 150, 220)
         doc.rect(0, 0, pageWidth, 50, "F")
 
         try {
@@ -133,16 +298,13 @@ const Predictions = () => {
         doc.setFont(undefined, "normal")
         doc.text("Lista de Compras Recomendada", 15, 35)
 
-        // Información
         doc.setTextColor(51, 65, 85)
         doc.setFontSize(10)
         doc.text(`Generado: ${new Date().toLocaleString("es-PE")}`, 15, 60)
         doc.text(`Usuario: ${user?.nombre || "N/A"}`, 15, 67)
 
-        // Filtrar productos que necesitan reabastecimiento
         const criticalProducts = allPredictions.filter((p) => p.priority === "CRITICA" || p.priority === "ALTA")
 
-        // Resumen
         doc.setFillColor(254, 226, 226)
         doc.roundedRect(15, 75, pageWidth - 30, 25, 3, 3, "F")
 
@@ -154,16 +316,16 @@ const Predictions = () => {
         doc.setFontSize(10)
         doc.text(`Total de productos a reabastecer: ${criticalProducts.length}`, 20, 93)
 
-        // Tabla de productos
         const tableData = criticalProducts.map((p) => [
             p.productName,
-            p.currentStock.toString(),
-            p.daysUntilStockout.toString(),
-            p.recommendedOrder.toString(),
-            p.priority,
+            (p.currentStock ?? "").toString(),
+            (p.daysUntilStockout ?? "").toString(),
+            (p.recommendedOrder ?? "").toString(),
+            p.priority ?? "",
         ])
 
-        doc.autoTable({
+        // Usar autoTable importado correctamente
+        autoTable(doc, {
             startY: 110,
             head: [["Producto", "Stock Actual", "Días Restantes", "Cant. Recomendada", "Prioridad"]],
             body: tableData,
@@ -192,8 +354,7 @@ const Predictions = () => {
             margin: { left: 15, right: 15 },
         })
 
-        // Recomendaciones
-        const finalY = doc.lastAutoTable.finalY || 110
+        const finalY = doc.lastAutoTable?.finalY || 110
         if (pageHeight - finalY > 60) {
             doc.setFillColor(239, 246, 255)
             doc.roundedRect(15, finalY + 10, pageWidth - 30, 40, 3, 3, "F")
@@ -212,7 +373,6 @@ const Predictions = () => {
             doc.text("• Contactar proveedores para confirmar disponibilidad", 25, finalY + 46)
         }
 
-        // Footer
         doc.setFillColor(248, 250, 252)
         doc.rect(0, pageHeight - 25, pageWidth, 25, "F")
 
@@ -230,7 +390,7 @@ const Predictions = () => {
                 <aside className={`sidebar ${isCollapsed ? "closed" : "open"}`}>
                     <div className="sidebar-header">
                         <div className="logo-container">
-                            <img src="/as.png" alt="Logo" className="logo-image" />
+                            <img src="/as.png" alt="Logo" className="logo-Image" />
                         </div>
                         <button className="toggle-btn" onClick={toggleSidebar}>
                             {isCollapsed ? <FiChevronLeft size={22} /> : <FiMenu size={22} />}
@@ -290,28 +450,92 @@ const Predictions = () => {
                         </div>
                     </div>
 
-                    {selectedProduct && predictionData.length > 0 && (
-                        <div className="prediction-chart-card">
-                            <div className="card-header">
-                                <FiTrendingUp size={24} />
-                                <h3>Proyección de Demanda - Próximos 30 Días</h3>
+                    {selectedProduct && selectedProductInfo && (
+                        <>
+                            <div className="prediction-metrics-grid">
+                                <div className="metric-card metric-stock">
+                                    <span className="metric-label">Stock Actual</span>
+                                    <span className="metric-value">{selectedProductInfo.currentStock}</span>
+                                </div>
+                                <div className="metric-card metric-daily">
+                                    <span className="metric-label">Venta Diaria Promedio</span>
+                                    <span className="metric-value">{selectedProductInfo.avgDailySales?.toFixed(1)}</span>
+                                </div>
+                                <div className="metric-card metric-days">
+                                    <span className="metric-label">Días hasta Agotamiento</span>
+                                    <span
+                                        className={`metric-value days-${selectedProductInfo.daysUntilStockout < 7 ? "critical" : selectedProductInfo.daysUntilStockout < 15 ? "warning" : "normal"}`}
+                                    >
+                                        {selectedProductInfo.daysUntilStockout} días
+                                    </span>
+                                </div>
+                                <div className="metric-card metric-order">
+                                    <span className="metric-label">Pedido Recomendado</span>
+                                    <span className="metric-value">{selectedProductInfo.recommendedOrder}</span>
+                                </div>
                             </div>
-                            <ResponsiveContainer width="100%" height={400}>
-                                <BarChart data={predictionData}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                                    <XAxis dataKey="day" tick={{ fontSize: 12 }} interval={2} />
-                                    <YAxis tick={{ fontSize: 12 }} />
-                                    <Tooltip
-                                        contentStyle={{
-                                            background: "white",
-                                            border: "1px solid #e2e8f0",
-                                            borderRadius: "8px",
-                                        }}
-                                    />
-                                    <Legend />
-                                    <Bar dataKey="demanda" fill="#6366f1" radius={[8, 8, 0, 0]} name="Demanda Estimada" />
-                                </BarChart>
-                            </ResponsiveContainer>
+
+                            <div className="prediction-chart-card">
+                                <div className="chart-header">
+                                    <div className="header-left">
+                                        <FiTrendingUp size={24} />
+                                        <div>
+                                            <h3>Proyección de Demanda</h3>
+                                            <p className="chart-subtitle">
+                                                Próximos {selectedPeriod} días para {selectedProductInfo.productName}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="chart-controls">
+                                        {/* Period selector */}
+                                        <div className="control-buttons">
+                                            {[7, 14, 30].map((days) => (
+                                                <button
+                                                    key={days}
+                                                    className={`period-btn ${selectedPeriod === days ? "active" : ""}`}
+                                                    onClick={() => handlePeriodChange(days)}
+                                                >
+                                                    {days}d
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {/* Chart type selector */}
+                                        <div className="control-buttons">
+                                            <button
+                                                className={`chart-type-btn ${chartType === "bar" ? "active" : ""}`}
+                                                onClick={() => setChartType("bar")}
+                                                title="Gráfico de Barras"
+                                            >
+                                                <FiBarChart2 size={18} />
+                                            </button>
+                                            <button
+                                                className={`chart-type-btn ${chartType === "line" ? "active" : ""}`}
+                                                onClick={() => setChartType("line")}
+                                                title="Gráfico de Líneas"
+                                            >
+                                                <FiLineChartIcon size={18} />
+                                            </button>
+                                            <button
+                                                className={`chart-type-btn ${chartType === "area" ? "active" : ""}`}
+                                                onClick={() => setChartType("area")}
+                                                title="Gráfico de Área"
+                                            >
+                                                <FiBarChart2 size={18} style={{ transform: "rotateZ(90deg)" }} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {predictionData.length > 0 && renderChart()}
+                            </div>
+                        </>
+                    )}
+
+                    {selectedProduct && predictionData.length === 0 && !loading && (
+                        <div className="no-data-card">
+                            <FiAlertTriangle size={32} />
+                            <p>No hay datos disponibles para este producto</p>
+                            <span>Asegúrate de que existan ventas registradas</span>
                         </div>
                     )}
 
@@ -343,7 +567,7 @@ const Predictions = () => {
                                                 <td className="text-center">
                                                     <span className="stock-badge">{p.currentStock}</span>
                                                 </td>
-                                                <td className="text-center">{p.avgDailySales.toFixed(2)}</td>
+                                                <td className="text-center">{(p.avgDailySales ?? 0).toFixed(2)}</td>
                                                 <td className="text-center">
                                                     <strong>{p.predictedDemand}</strong>
                                                 </td>

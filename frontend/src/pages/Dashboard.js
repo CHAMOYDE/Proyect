@@ -9,6 +9,18 @@ import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Toolti
 import Header from "../components/Header"
 import "./Dashboard.css"
 
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="custom-tooltip">
+        <p className="label">{payload[0].payload.mes}</p>
+        <p className="value">S/ {payload[0].value.toLocaleString("es-PE", { maximumFractionDigits: 2 })}</p>
+      </div>
+    )
+  }
+  return null
+}
+
 const Dashboard = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -188,12 +200,20 @@ const Dashboard = () => {
               <h3>Ventas Últimos Meses</h3>
               {chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="mes" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="ventas" fill="#6366f1" radius={[8, 8, 0, 0]} />
+                  <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 200, 255, 0.1)" vertical={false} />
+                    <XAxis
+                      dataKey="mes"
+                      tick={{ fill: "#b0b0b0", fontSize: 12 }}
+                      axisLine={{ stroke: "rgba(0, 200, 255, 0.2)" }}
+                    />
+                    <YAxis
+                      tick={{ fill: "#b0b0b0", fontSize: 12 }}
+                      axisLine={{ stroke: "rgba(0, 200, 255, 0.2)" }}
+                      tickFormatter={(value) => `S/ ${(value / 1000).toFixed(0)}k`}
+                    />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Bar dataKey="ventas" fill="#0096dc" radius={[8, 8, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
