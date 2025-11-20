@@ -764,3 +764,159 @@
     width: 100%;
   }
 }
+
+/* Added styles for the new overview dashboard */
+.overview-dashboard {
+  margin-bottom: 32px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.overview-title {
+  font-size: 20px;
+  color: #00ffff;
+  margin-bottom: 20px;
+  font-weight: 600;
+  border-left: 4px solid #00c8ff;
+  padding-left: 12px;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.overview-card {
+  background: #141829;
+  border: 1px solid #1f2942;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.overview-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 150, 220, 0.15);
+  border-color: #00c8ff;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #a0aec0;
+  font-weight: 600;
+}
+
+.card-header svg {
+  color: #00c8ff;
+  opacity: 0.8;
+}
+
+.card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.big-number {
+  font-size: 36px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 4px;
+  text-shadow: 0 0 20px rgba(0, 200, 255, 0.3);
+}
+
+.card-subtitle {
+  color: #64748b;
+  font-size: 13px;
+  margin: 0;
+}
+
+.overview-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.list-item.critical {
+  background: rgba(239, 68, 68, 0.1);
+  border-left: 3px solid #ef4444;
+}
+
+.list-item.safe {
+  color: #10b981;
+  justify-content: center;
+  font-style: italic;
+}
+
+.item-name {
+  color: #e2e8f0;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60%;
+}
+
+.item-value {
+  color: #00ffff;
+  font-weight: 700;
+}
+
+.list-item.critical .item-value {
+  color: #fca5a5;
+}
+
+/* Specific card accents */
+.sales-card {
+  background: linear-gradient(145deg, #141829 0%, rgba(0, 150, 220, 0.05) 100%);
+}
+
+.risk-card .card-header svg {
+  color: #ef4444;
+}
+
+.turnover-card .card-header svg {
+  color: #10b981;
+}
+
+.purchase-card .card-header svg {
+  color: #f59e0b;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

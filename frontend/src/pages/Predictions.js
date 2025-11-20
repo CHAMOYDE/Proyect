@@ -42,6 +42,42 @@ const Predictions = () => {
     // Alias para el icono de "line chart" (FiLineChart no existe en react-icons/fi)
     const FiLineChartIcon = FiTrendingUp
 
+    const getOverviewMetrics = () => {
+        if (!allPredictions.length) return null
+
+        // 1. Future Sales (Total predicted demand for next 30 days)
+        const totalPredictedSales = allPredictions.reduce((sum, p) => sum + (p.predictedDemand || 0), 0)
+
+        // 2. Stockout Risk (Products with < 15 days stock)
+        const stockoutRiskProducts = allPredictions
+            .filter((p) => p.daysUntilStockout < 15)
+            .sort((a, b) => a.daysUntilStockout - b.daysUntilStockout)
+            .slice(0, 3)
+
+        // 3. High Turnover (Top 3 by daily sales)
+        const highTurnoverProducts = [...allPredictions]
+            .sort((a, b) => (b.avgDailySales || 0) - (a.avgDailySales || 0))
+            .slice(0, 3)
+
+        // 4. Recommended Purchases (Top 3 by priority/urgency)
+        const recommendedPurchases = allPredictions
+            .filter((p) => p.recommendedOrder > 0)
+            .sort((a, b) => {
+                const priorityOrder = { CRITICA: 0, ALTA: 1, MEDIA: 2, BAJA: 3 }
+                return (priorityOrder[a.priority] || 3) - (priorityOrder[b.priority] || 3)
+            })
+            .slice(0, 3)
+
+        return {
+            totalPredictedSales,
+            stockoutRiskProducts,
+            highTurnoverProducts,
+            recommendedPurchases,
+        }
+    }
+
+    const overviewMetrics = getOverviewMetrics()
+
     useEffect(() => {
         loadProducts()
         loadAllPredictions()
@@ -383,6 +419,91 @@ const Predictions = () => {
         doc.save(`Lista_Compras_${new Date().toISOString().split("T")[0]}.pdf`)
     }
 
+    const renderOverview = () => {
+        if (!overviewMetrics) return null
+
+        return (
+            <div className="overview-dashboard">
+                <h2 className="overview-title">Resumen de Predicciones</h2>
+                <div className="overview-grid">
+                    {/* Card 1: Future Sales */}
+                    <div className="overview-card sales-card">
+                        <div className="card-header">
+                            <h3>Ventas Futuras (30 días)</h3>
+                            <FiTrendingUp size={20} />
+                        </div>
+                        <div className="card-content">
+                            <span className="big-number">{overviewMetrics.totalPredictedSales.toLocaleString()}</span>
+                            <p className="card-subtitle">Unidades totales estimadas</p>
+                        </div>
+                    </div>
+
+                    {/* Card 2: Stockout Risk */}
+                    <div className="overview-card risk-card">
+                        <div className="card-header">
+                            <h3>Riesgo de Quiebre</h3>
+                            <FiAlertTriangle size={20} />
+                        </div>
+                        <div className="card-content">
+                            <ul className="overview-list">
+                                {overviewMetrics.stockoutRiskProducts.length > 0 ? (
+                                    overviewMetrics.stockoutRiskProducts.map((p) => (
+                                        <li key={p.productId} className="list-item critical">
+                                            <span className="item-name">{p.productName}</span>
+                                            <span className="item-value">{p.daysUntilStockout} días</span>
+                                        </li>
+                                    ))
+                                ) : (
+                                    <li className="list-item safe">Sin riesgos inminentes</li>
+                                )}
+                            </ul>
+                        </div>
+                    </div>
+
+                    {/* Card 3: High Turnover */}
+                    <div className="overview-card turnover-card">
+                        <div className="card-header">
+                            <h3>Mayor Rotación</h3>
+                            <FiBarChart2 size={20} />
+                        </div>
+                        <div className="card-content">
+                            <ul className="overview-list">
+                                {overviewMetrics.highTurnoverProducts.map((p) => (
+                                    <li key={p.productId} className="list-item">
+                                        <span className="item-name">{p.productName}</span>
+                                        <span className="item-value">{p.avgDailySales?.toFixed(1)} u/día</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+
+                    {/* Card 4: Recommended Purchases */}
+                    <div className="overview-card purchase-card">
+                        <div className="card-header">
+                            <h3>Comprar Pronto</h3>
+                            <FiDownload size={20} />
+                        </div>
+                        <div className="card-content">
+                            <ul className="overview-list">
+                                {overviewMetrics.recommendedPurchases.length > 0 ? (
+                                    overviewMetrics.recommendedPurchases.map((p) => (
+                                        <li key={p.productId} className="list-item">
+                                            <span className="item-name">{p.productName}</span>
+                                            <span className="item-value">{p.recommendedOrder} un.</span>
+                                        </li>
+                                    ))
+                                ) : (
+                                    <li className="list-item safe">Stock suficiente</li>
+                                )}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <>
             <Header isCollapsed={isCollapsed} />
@@ -431,6 +552,9 @@ const Predictions = () => {
                             <span>{error}</span>
                         </div>
                     )}
+
+                    {/* Inserted the overview dashboard before the product selector */}
+                    {!selectedProduct && !loading && renderOverview()}
 
                     <div className="predictions-controls">
                         <div className="control-group">
